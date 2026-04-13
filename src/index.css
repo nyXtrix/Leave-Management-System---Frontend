@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+@theme {
+  /* Primary Scale (Cloudflare Red) */
+  --color-primary-100: #FFF1F1;
+  --color-primary-200: #FFE1E1;
+  --color-primary-300: #FFC2C2;
+  --color-primary-400: #FF8585;
+  --color-primary-500: #FF1919;
+  --color-primary-600: #D91515;
+  --color-primary-700: #B31111;
+  --color-primary-800: #8C0D0D;
+  --color-primary-900: #660A0A;
+
+  /* Secondary Scale (Midnight Navy) */
+--color-secondary-100: #F5F7FA;
+--color-secondary-200: #E4E7EC;
+--color-secondary-300: #D0D5DD;
+--color-secondary-400: #98A2B3;
+--color-secondary-500: #667085;
+--color-secondary-600: #475467;
+--color-secondary-700: #344054;
+--color-secondary-800: #1D2939;
+--color-secondary-900: #101828;
+
+  /* Base UI colors */
+  --color-background: #FFFFFF;
+  --color-foreground: #051020;
+  --radius-xl: 0.75rem; /* Cloudflare uses slightly sharper corners */
+}
+
+@layer base {
+  :root {
+    --background: #FFFFFF;
+    --foreground: #051020;
+    
+    --card: #FFFFFF;
+    --card-foreground: #051020;
+    
+    --popover: #FFFFFF;
+    --popover-foreground: #051020;
+
+    /* Legacy variables for shadcn compatibility */
+    --primary: 0 82% 55%; /* Approximation of #FF1919 */
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 217 73% 7%; /* Approximation of #051020 */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: #F8FAFC;
+    --muted-foreground: #64748B;
+    
+    --accent: #F1F5F9;
+    --accent-foreground: #051020;
+    
+    --destructive: #EF4444;
+    --destructive-foreground: #FFFFFF;
+    
+    --border: #E2E8F0;
+    --input: #E2E8F0;
+    --ring: #FF1919;
+    --radius: 0.75rem;
+  }
+
+  * {
+    box-sizing: border-box;
+    border-color: var(--border);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif; /* Cloudflare uses very clean Inter sans-serif */
+    letter-spacing: -0.03em;
+    font-weight: 700;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: #E2E8F0;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Cloudflare Style Glassmorphism (Subtler) */
+  .glass {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  /* Sharp Sophisticated Gradients */
+  .gradient-primary {
+    background: linear-gradient(135deg, #FF1919 0%, #FF4D4D 100%);
+  }
+
+  .gradient-secondary {
+    background: linear-gradient(135deg, #051020 0%, #1E293B 100%);
+  }
+
+  .gradient-subtle {
+    background: linear-gradient(to right, #FFFFFF, #F8FAFC);
+  }
+
+  .gradient-mesh {
+    background-color: #FFFFFF;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(255, 25, 25, 0.03) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(5, 16, 32, 0.03) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(255, 25, 25, 0.02) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(5, 16, 32, 0.02) 0px, transparent 50%);
+  }
+
+  /* Precision Shadows */
+  .shadow-premium {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 10px 20px -5px rgba(0, 0, 0, 0.03);
+  }
+
+  .shadow-glow-primary {
+    box-shadow: 0 0 30px -10px rgba(255, 25, 25, 0.25);
+  }
+
+  .shadow-glow-secondary {
+    box-shadow: 0 0 30px -10px rgba(5, 16, 32, 0.2);
+  }
+
+  /* Animated Reveal */
+  .animate-reveal {
+    animation: reveal 0.5s cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  /* App Triangle Loader (From Uiverse by umairmanzoor1143) */
+  .app-loader {
+    width: 50px;
+    aspect-ratio: 1.154;
+    position: relative;
+    background: conic-gradient(
+      from 120deg at 50% 64%,
+      #0000,
+      var(--color-primary-500) 1deg 120deg,
+      #0000 121deg
+    );
+    animation: l27-0 1.5s infinite cubic-bezier(0.3, 1, 0, 1);
+  }
+
+  .app-loader:before,
+  .app-loader:after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: inherit;
+    transform-origin: 50% 66%;
+    animation: l27-1 1.5s infinite;
+  }
+
+  .app-loader:after {
+    --s: -1;
+  }
+}
+
+@keyframes l27-0 {
+  0%, 30% { transform: rotate(0); }
+  70% { transform: rotate(120deg); }
+  70.01%, 100% { transform: rotate(360deg); }
+}
+
+@keyframes l27-1 {
+  0% { transform: rotate(calc(var(--s, 1) * 120deg)) translate(0); }
+  30%, 70% { transform: rotate(calc(var(--s, 1) * 120deg)) translate(calc(var(--s, 1) * -5px), 10px); }
+  100% { transform: rotate(calc(var(--s, 1) * 120deg)) translate(0); }
+}
+
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

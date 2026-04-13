@@ -1,0 +1,92 @@
+[
+  {
+    "id": "1",
+    "name": "Alex Johnson",
+    "role": "CEO",
+    "dept": "Executive",
+    "avatar": "https://ui-avatars.com/api/?name=Alex+Johnson&background=020617&color=fff",
+    "managerId": null,
+    "hasChildren": true
+  },
+  {
+    "id": "2",
+    "name": "James Chen",
+    "role": "VP of Engineering",
+    "dept": "Engineering",
+    "avatar": "https://ui-avatars.com/api/?name=James+Chen&background=4f46e5&color=fff",
+    "managerId": "1",
+    "hasChildren": true
+  },
+  {
+    "id": "3",
+    "name": "Sarah Lee",
+    "role": "Engineering Manager",
+    "dept": "Engineering",
+    "avatar": "https://ui-avatars.com/api/?name=Sarah+Lee&background=f472b6&color=fff",
+    "managerId": "2",
+    "hasChildren": true
+  },
+  {
+    "id": "4",
+    "name": "Mike Ross",
+    "role": "Senior Developer",
+    "dept": "Engineering",
+    "avatar": "https://ui-avatars.com/api/?name=Mike+Ross&background=10b981&color=fff",
+    "managerId": "3",
+    "hasChildren": false
+  },
+  {
+    "id": "5",
+    "name": "Harvey Specter",
+    "role": "Lead Architect",
+    "dept": "Engineering",
+    "avatar": "https://ui-avatars.com/api/?name=Harvey+Specter&background=6366f1&color=fff",
+    "managerId": "3",
+    "hasChildren": false
+  },
+  {
+    "id": "6",
+    "name": "Mark Woods",
+    "role": "VP of Product",
+    "dept": "Product",
+    "avatar": "https://ui-avatars.com/api/?name=Mark+Woods&background=0ea5e9&color=fff",
+    "managerId": "1",
+    "hasChildren": true
+  },
+  {
+    "id": "7",
+    "name": "Emily Davis",
+    "role": "Product Manager",
+    "dept": "Product",
+    "avatar": "https://ui-avatars.com/api/?name=Emily+Davis&background=f59e0b&color=fff",
+    "managerId": "6",
+    "hasChildren": true
+  },
+  {
+    "id": "8",
+    "name": "Donna Paulsen",
+    "role": "Senior Designer",
+    "dept": "Design",
+    "avatar": "https://ui-avatars.com/api/?name=Donna+Paulsen&background=ec4899&color=fff",
+    "managerId": "7",
+    "hasChildren": false
+  },
+  {
+    "id": "9",
+    "name": "Priya Sharma",
+    "role": "VP of Growth",
+    "dept": "Marketing",
+    "avatar": "https://ui-avatars.com/api/?name=Priya+Sharma&background=8b5cf6&color=fff",
+    "managerId": "1",
+    "hasChildren": true
+  },
+  {
+    "id": "10",
+    "name": "Tom Fisher",
+    "role": "Growth Lead",
+    "dept": "Marketing",
+    "avatar": "https://ui-avatars.com/api/?name=Tom+Fisher&background=14b8a6&color=fff",
+    "managerId": "9",
+    "hasChildren": false
+  }
+]
