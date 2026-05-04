@@ -1,6 +1,6 @@
 import { Toast } from '@/components/ui/sonner';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5090/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5090/api/v1';
 
 export const getTenant = () => {
   const parts = window.location.pathname.split('/');
@@ -25,7 +25,38 @@ export interface RequestOptions {
   headers?: Record<string, string>;
 }
 
-async function handleResponse<T>(res: Response, options?: RequestOptions): Promise<T> {
+let refreshingPromise: Promise<boolean> | null = null;
+
+async function handleResponse<T>(
+  res: Response, 
+  options?: RequestOptions,
+  retryFn?: () => Promise<T>
+): Promise<T> {
+  // Automatic Refresh on 401
+  if (res.status === 401 && retryFn && !res.url.includes('/auth/authentication/refresh')) {
+    if (!refreshingPromise) {
+      refreshingPromise = (async () => {
+        try {
+          const refreshRes = await fetch(`${API_BASE_URL}/auth/authentication/refresh`, {
+            method: 'POST',
+            headers: buildHeaders(),
+            credentials: 'include',
+          });
+          return refreshRes.ok;
+        } catch {
+          return false;
+        } finally {
+          refreshingPromise = null;
+        }
+      })();
+    }
+
+    const isRefreshed = await refreshingPromise;
+    if (isRefreshed) {
+      return await retryFn();
+    }
+  }
+
   if (!res.ok) {
     let message = 'An error occurred during communication.';
     try {
@@ -73,7 +104,7 @@ const BaseRequestProvider = {
       headers: buildHeaders(options?.headers),
       credentials: 'include',
     });
-    return handleResponse<T>(res, options);
+    return handleResponse<T>(res, options, () => this.get<T>(endpoint, params, options));
   },
 
   async post<T>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T> {
@@ -83,7 +114,7 @@ const BaseRequestProvider = {
       body: data !== undefined ? JSON.stringify(data) : undefined,
       credentials: 'include',
     });
-    return handleResponse<T>(res, options);
+    return handleResponse<T>(res, options, () => this.post<T>(endpoint, data, options));
   },
 
   async put<T>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T> {
@@ -93,7 +124,7 @@ const BaseRequestProvider = {
       body: data !== undefined ? JSON.stringify(data) : undefined,
       credentials: 'include',
     });
-    return handleResponse<T>(res, options);
+    return handleResponse<T>(res, options, () => this.put<T>(endpoint, data, options));
   },
 
   async patch<T>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T> {
@@ -103,7 +134,7 @@ const BaseRequestProvider = {
       body: data !== undefined ? JSON.stringify(data) : undefined,
       credentials: 'include',
     });
-    return handleResponse<T>(res, options);
+    return handleResponse<T>(res, options, () => this.patch<T>(endpoint, data, options));
   },
 
   async delete<T>(endpoint: string, options?: RequestOptions): Promise<T> {
@@ -112,11 +143,10 @@ const BaseRequestProvider = {
       headers: buildHeaders(options?.headers),
       credentials: 'include',
     });
-    return handleResponse<T>(res, options);
+    return handleResponse<T>(res, options, () => this.delete<T>(endpoint, options));
   },
 
-  clearToken() {
-  },
+  clearToken() {},
 };
 
 export default BaseRequestProvider;

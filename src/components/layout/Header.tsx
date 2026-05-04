@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bell, Search, Plus, Building2, ChevronDown, CalendarDays, ShieldCheck, X, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -24,15 +25,19 @@ const MOCK_NOTIFICATIONS = [
 
 export function Header() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [applyOpen, setApplyOpen] = useState(false);
   const [search, setSearch] = useState('');
 
   const unread = MOCK_NOTIFICATIONS.filter((n) => !n.read).length;
 
-  function getInitials(name: string) {
-    return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+  const displayName = user ? `${user.firstName} ${user.lastName}` : 'User';
+
+  function getInitials(first: string, last: string) {
+    return (first[0] + last[0]).toUpperCase();
   }
+
 
   return (
     <>
@@ -177,31 +182,31 @@ export function Header() {
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center h-12 pl-1 pr-1.5 rounded-2xl bg-white border border-slate-200/60 shadow-sm hover:shadow-md hover:border-slate-300 transition-all group">
                   <Avatar className="h-9 w-9 rounded-[0.8rem] shadow-sm ring-1 ring-slate-100 group-hover:scale-95 transition-transform">
-                    <AvatarImage src={user?.avatar} alt={user?.name} className="object-cover" />
                     <AvatarFallback className="bg-slate-100 text-slate-600 font-black text-xs">
-                      {user ? getInitials(user.name) : 'U'}
+                      {user ? getInitials(user.firstName, user.lastName) : 'U'}
                     </AvatarFallback>
                   </Avatar>
+
                   <ChevronDown className="h-3.5 w-3.5 text-slate-400 group-hover:text-indigo-600 transition-colors ml-1 hidden sm:block" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 rounded-3xl p-2 shadow-2xl border-slate-100 animate-slide-up">
                 <div className="px-4 py-4 mb-2 flex items-center gap-3 bg-slate-50 rounded-2xl">
                    <Avatar className="h-10 w-10">
-                    <AvatarImage src={user?.avatar} alt={user?.name} />
-                    <AvatarFallback className="font-bold">{user ? getInitials(user.name) : 'U'}</AvatarFallback>
+                    <AvatarFallback className="font-bold">{user ? getInitials(user.firstName, user.lastName) : 'U'}</AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                    <p className="text-sm font-black text-slate-800 truncate">{user?.name}</p>
+                    <p className="text-sm font-black text-slate-800 truncate">{displayName}</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">{user?.role?.replace('_', ' ')}</p>
                   </div>
                 </div>
+
                 <DropdownMenuSeparator className="mx-2" />
-                <DropdownMenuItem className="h-11 rounded-xl px-4 font-bold text-sm text-slate-600 gap-3 focus:bg-indigo-50 focus:text-indigo-700">
+                <DropdownMenuItem 
+                  className="h-11 rounded-xl px-4 font-bold text-sm text-slate-600 gap-3 focus:bg-indigo-50 focus:text-indigo-700 cursor-pointer"
+                  onClick={() => navigate(`/${user?.subdomain}/profile`)}
+                >
                   <User className="h-4 w-4" /> Personnel Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem className="h-11 rounded-xl px-4 font-bold text-sm text-slate-600 gap-3 focus:bg-indigo-50 focus:text-indigo-700">
-                   <Settings className="h-4 w-4" /> Global Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="mx-2" />
                 <DropdownMenuItem

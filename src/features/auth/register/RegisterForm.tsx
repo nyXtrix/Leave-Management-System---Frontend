@@ -1,7 +1,8 @@
 import React from "react";
 import { z } from "zod";
-import type { UseFormReturn } from "react-hook-form";
-import { Building2, Globe, Mail } from "lucide-react";
+import { useForm, type UseFormReturn } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Building2, Globe, Mail, User } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Form, FormPasswordInput, FormInput } from "@/components/common/forms";
 import RegisterImage from "@/assets/undraw/undraw_contract_ynau.svg";
@@ -12,7 +13,12 @@ import {
 } from "@/validations/auth/RegisterValidation";
 
 interface RegisterFormProps {
-  inviteMeta: { companyName?: string; name?: string; email?: string };
+  inviteMeta: {
+    companyName?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+  };
   onSubmit: (
     data: RegisterFormData,
     methods: UseFormReturn<RegisterFormData>,
@@ -20,6 +26,20 @@ interface RegisterFormProps {
 }
 
 const RegisterForm = ({ inviteMeta, onSubmit }: RegisterFormProps) => {
+  const methods = useForm<RegisterFormData>({
+    resolver: zodResolver(RegisterValidationSchema),
+    defaultValues: {
+      FirstName: inviteMeta.firstName || "",
+      LastName: inviteMeta.lastName || "",
+      AdminPassword: "",
+      CompanyName: "",
+      Subdomain: "",
+      email: inviteMeta.email || "",
+    },
+  });
+
+  const { formState: { isSubmitting } } = methods;
+
   return (
     <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center relative z-10">
       <div className="space-y-8 animate-reveal">
@@ -37,19 +57,13 @@ const RegisterForm = ({ inviteMeta, onSubmit }: RegisterFormProps) => {
         <div className="relative z-10 space-y-8">
           <Form
             schema={RegisterValidationSchema}
+            methods={methods}
             onSubmit={onSubmit}
-            defaultValues={{
-              AdminPassword: "",
-              CompanyName: "",
-              Subdomain: "",
-              email: inviteMeta.email || "",
-            }}
             className="space-y-8"
           >
-            {({ formState: { isSubmitting } }) => (
-              <div className="space-y-6">
-                {!inviteMeta.companyName && (
-                  <>
+            <div className="space-y-6">
+              {!inviteMeta.companyName && (
+                <>
                     <FormInput
                       name="CompanyName"
                       label="Organization Name"
@@ -58,6 +72,24 @@ const RegisterForm = ({ inviteMeta, onSubmit }: RegisterFormProps) => {
                       required
                       size="md"
                     />
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormInput
+                        name="FirstName"
+                        label="First Name"
+                        placeholder="John"
+                        icon={User}
+                        required
+                        size="md"
+                      />
+                      <FormInput
+                        name="LastName"
+                        label="Last Name"
+                        placeholder="Doe"
+                        icon={User}
+                        required
+                        size="md"
+                      />
+                    </div>
                     <FormInput
                       name="email"
                       label="Email"
@@ -67,40 +99,39 @@ const RegisterForm = ({ inviteMeta, onSubmit }: RegisterFormProps) => {
                       size="md"
                       disabled
                     />
-                    <div className="space-y-2">
-                      <FormInput
-                        name="Subdomain"
-                        label="Workplace URL"
-                        placeholder="my-company"
-                        icon={Globe}
-                        required
-                        className="pr-24"
-                        size="md"
-                        rightSection={
-                          <span className="text-sm font-bold text-slate-400 group-focus-within/input:text-primary-500 transition-colors mr-2">
-                            .lms.com
-                          </span>
-                        }
-                      />
-                    </div>
-                    <FormPasswordInput
-                      name="AdminPassword"
-                      label="Create Password"
-                      placeholder="Enter at least 6 characters"
+                  <div className="space-y-2">
+                    <FormInput
+                      name="Subdomain"
+                      label="Workplace URL"
+                      placeholder="my-company"
+                      icon={Globe}
+                      required
+                      className="pr-24"
                       size="md"
+                      rightSection={
+                        <span className="text-sm font-bold text-slate-400 group-focus-within/input:text-primary-500 transition-colors mr-2">
+                          .lms.com
+                        </span>
+                      }
                     />
-                  </>
-                )}
+                  </div>
+                  <FormPasswordInput
+                    name="AdminPassword"
+                    label="Create Password"
+                    placeholder="Enter at least 6 characters"
+                    size="md"
+                  />
+                </>
+              )}
 
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full"
-                >
-                  {isSubmitting ? "Creating Workspace..." : "Create Workspace"}
-                </Button>
-              </div>
-            )}
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full"
+              >
+                {isSubmitting ? "Creating Workspace..." : "Create Workspace"}
+              </Button>
+            </div>
           </Form>
         </div>
       </div>

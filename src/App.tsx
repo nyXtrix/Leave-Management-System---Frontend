@@ -5,14 +5,18 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { AppRoutes } from '@/routes/AppRoutes';
 import { Toaster } from '@/components/ui/sonner';
 
+import { LoaderProvider } from '@/contexts/LoaderContext';
+
 function App() {
   return (
     <Provider store={store}>
       <BrowserRouter>
-        <AuthProvider>
-          <AppRoutes />
-          <Toaster />
-        </AuthProvider>
+        <LoaderProvider>
+          <AuthProvider>
+            <AppRoutes />
+            <Toaster />
+          </AuthProvider>
+        </LoaderProvider>
       </BrowserRouter>
     </Provider>
   );

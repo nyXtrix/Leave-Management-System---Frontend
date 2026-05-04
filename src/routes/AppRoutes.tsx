@@ -14,13 +14,17 @@ import { AuthCallbackPage } from '@/pages/AuthCallbackPage';
 import { PolicyPage } from '@/pages/PolicyPage';
 import { LeaveManagementPage } from '@/pages/LeaveManagementPage';
 import { InviteUserPage } from '@/pages/InviteUserPage';
-import { RolesPage } from '@/pages/RolesPage';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { ProtectedRoute as AuthProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { GuestRoute } from '@/components/auth/GuestRoute';
 import HomeLayout from '@/components/layout/HomeLayout';
 import ContactPage from '@/pages/ContactPage';
 import AuthLayout from '@/components/layout/AuthLayout';
 import Loader from '@/components/common/Loader';
+import { PermissionGuard } from '@/components/common/PermissionGuard';
+import EmployeeProfile from '@/pages/EmployeeProfile';
+import { TeamPage } from '@/pages/TeamPage';
+import { CalendarPage } from '@/pages/CalendarPage';
+import { SetPasswordPage } from '@/pages/SetPasswordPage';
 
 export function AppRoutes() {
   const { isLoading } = useAuth();
@@ -52,31 +56,96 @@ export function AppRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/auth-callback" element={<AuthCallbackPage />} />
-        <Route path="/set-password" element={<></>} />
+        <Route path="/set-password" element={<SetPasswordPage />} />
         <Route path="/forgot-password" element={<></>} />
       </Route>
 
       <Route
         path="/:subdomain"
         element={
-          <ProtectedRoute>
+          <AuthProtectedRoute>
             <AppLayout />
-          </ProtectedRoute>
+          </AuthProtectedRoute>
         }
       >
-        <Route path="dashboard" element={<DashboardPage />} />
-        <Route path="leaves" element={<LeavesPage />} />
-        <Route path="approvals" element={<ApprovalsPage />} />
-        <Route path="leave-management" element={<LeaveManagementPage />} />
-        <Route path="policy" element={<PolicyPage />} />
-        <Route path="employees" element={<EmployeesPage />} />
-        <Route path="employees/invite" element={<InviteUserPage />} />
-        <Route path="organization" element={<OrganizationPage />} />
-        <Route path="organization/roles" element={<RolesPage />} />
-        <Route path="settings" element={<SettingsPage />} />
+        <Route path="dashboard" element={
+          <PermissionGuard moduleId="DASHBOARD">
+            <DashboardPage />
+          </PermissionGuard>
+        } />
+        
+        <Route path="employee/profile/:employeeId" element={
+          <PermissionGuard moduleId="EMPLOYEE_MGMT" action="VIEW">
+            <EmployeeProfile />
+          </PermissionGuard>
+        } />
+        
+        <Route path="leaves" element={
+          <PermissionGuard moduleId="MY_LEAVES">
+            <LeavesPage />
+          </PermissionGuard>
+        } />
+
+        <Route path="team" element={
+          <TeamPage />
+        } />
+
+        <Route path="calendar" element={
+          <CalendarPage />
+        } />
+        
+        <Route path="approvals" element={
+          <PermissionGuard moduleId="APPROVALS">
+            <ApprovalsPage />
+          </PermissionGuard>
+        } />
+        
+        <Route path="leave-management" element={
+          <PermissionGuard moduleId="LEAVE_MGMT">
+            <LeaveManagementPage />
+          </PermissionGuard>
+        } />
+        
+        <Route path="policy" element={
+          <PermissionGuard moduleId="POLICY">
+            <PolicyPage />
+          </PermissionGuard>
+        } />
+        
+        <Route path="employees" element={
+          <PermissionGuard moduleId="EMPLOYEE_MGMT">
+            <EmployeesPage />
+          </PermissionGuard>
+        } />
+        
+        <Route path="employees/invite" element={
+          <PermissionGuard moduleId="EMPLOYEE_MGMT" action="CREATE">
+            <InviteUserPage />
+          </PermissionGuard>
+        } />
+
+        
+        <Route path="organization" element={
+          <PermissionGuard moduleId="ORGANIZATION">
+            <OrganizationPage />
+          </PermissionGuard>
+        } />
+        
+        <Route path="profile" element={
+          <PermissionGuard moduleId="PROFILE">
+            <EmployeeProfile />
+          </PermissionGuard>
+        } />
         
         <Route index element={<Navigate to="dashboard" replace />} />
       </Route>
+
+      <Route path="/unauthorized" element={
+        <div className="h-screen w-full flex flex-col items-center justify-center bg-slate-50">
+          <h1 className="text-4xl font-black text-rose-500 tracking-tight">403</h1>
+          <p className="text-slate-500 font-medium">You do not have permission to view this page.</p>
+        </div>
+      } />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

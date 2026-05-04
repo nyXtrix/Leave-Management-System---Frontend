@@ -18,7 +18,8 @@ const RegisterManagement = () => {
   const [isTokenValid, setIsTokenValid] = useState(false);
   const [inviteMeta, setInviteMeta] = useState<{
     companyName?: string;
-    name?: string;
+    firstName?: string;
+    lastName?: string;
     email?: string;
   }>({});
 
@@ -52,10 +53,11 @@ const RegisterManagement = () => {
       if (!inviteMeta.companyName) {
         await register({
           registrationToken: token,
-          companyName: data.CompanyName,
-          subdomain: data.Subdomain,
-          adminName: inviteMeta.name,
-          adminEmail: data.email || inviteMeta.email,
+          companyName: data.CompanyName || "",
+          subdomain: data.Subdomain || "",
+          firstName: data.FirstName,
+          lastName: data.LastName,
+          adminEmail: data.email || inviteMeta.email || "",
           adminPassword: data.AdminPassword,
         });
       } else {

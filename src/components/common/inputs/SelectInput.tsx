@@ -29,6 +29,7 @@ interface SelectInputProps {
   onChange?: (value: string | number) => void;
   className?: string;
   id?: string;
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
 }
 
 const SelectInput = React.forwardRef<HTMLButtonElement, SelectInputProps>(
@@ -47,6 +48,7 @@ const SelectInput = React.forwardRef<HTMLButtonElement, SelectInputProps>(
       defaultValue,
       onChange,
       id,
+      size = "md",
     },
     ref
   ) => {
@@ -61,6 +63,14 @@ const SelectInput = React.forwardRef<HTMLButtonElement, SelectInputProps>(
       onChange?.(val);
       setIsOpen(false);
     };
+
+    const sizeVariants = {
+      xs: "h-8 px-2 py-1 text-[11px]",
+      sm: "h-10 px-3 py-1.5 text-[12px]",
+      md: "h-12 px-4 py-2 text-[13px]",
+      lg: "h-14 px-5 py-2.5 text-[14px]",
+      xl: "h-16 px-6 py-3 text-[15px]",
+    }
 
     return (
       <div className="w-full space-y-2">
@@ -93,11 +103,12 @@ const SelectInput = React.forwardRef<HTMLButtonElement, SelectInputProps>(
                 iconClassName
               )}
               className={cn(
-                "flex hover:text-gray-700 select-none h-12 w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50/50 px-4 text-sm font-medium transition-all outline-none",
+                "flex hover:text-gray-700 select-none w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50/50 text-sm font-medium transition-all outline-none",
                 "focus:bg-white focus:border-primary-300 focus:ring-0 hover:bg-white hover:border-slate-300",
-                !selectedOption && "text-slate-400 tracking-widest text-xs",
+                !selectedOption && "text-slate-400 text-xs",
                 selectedOption && "text-slate-700",
                 error && "border-red-500 focus:border-red-500 focus:ring-red-100",
+                sizeVariants[size],
                 className
               )}
             >
@@ -116,7 +127,7 @@ const SelectInput = React.forwardRef<HTMLButtonElement, SelectInputProps>(
 
           <DropdownMenuContent 
             align="start" 
-            className="w-[calc(var(--radix-dropdown-menu-trigger-width))] p-2 mt-2 glass rounded-2xl animate-reveal z-50 overflow-hidden"
+            className="w-[calc(var(--radix-dropdown-menu-trigger-width))] p-2 mt-2 rounded-2xl animate-reveal z-50 overflow-hidden"
           >
             <div className="max-h-[250px] overflow-y-auto no-scrollbar py-1">
               {options.map((option) => (
