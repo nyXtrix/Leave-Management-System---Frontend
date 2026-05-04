@@ -27,11 +27,9 @@ export function StatCard({
         className
       )}
     >
-      {/* Subtle Background Decorative Element */}
       <div className="absolute -right-6 -bottom-6 h-32 w-32 rounded-full bg-slate-50/50 blur-3xl pointer-events-none group-hover:bg-slate-100/50 transition-colors" />
 
       <div className="relative z-10 flex flex-col justify-between h-full min-h-[140px]">
-        {/* Top Row: Title + Icon */}
         <div className="flex justify-between items-start">
           <p className="text-xl font-semibold text-secondary-500 mt-1">
             {title}

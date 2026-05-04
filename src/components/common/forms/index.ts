@@ -4,4 +4,7 @@ export * from "./FormSelect";
 export * from "./FormTextarea";
 export * from "./FormPasswordInput";
 export * from "./FormDatePicker";
-
+export { FormSwitch } from './FormSwitch';
+export { FormCheckbox } from './FormCheckbox';
+export * from "./FormUserSelect";
+export { FormFileUploader } from './FormFileUploader';

@@ -10,3 +10,14 @@ export type HomeNavSection = {
   label: string;
   items: HomeNavItem[];
 };
+
+export interface PaginatedResult<T> {
+  items: T[];
+  totalCount: number;
+}
+
+export interface QueryParams {
+  page?: number;
+  pageSize?: number;
+  searchTerm?: string;
+}

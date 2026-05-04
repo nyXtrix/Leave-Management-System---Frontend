@@ -5,11 +5,10 @@ import { Bell } from "lucide-react"
 interface AuthNavbarProps{
     tenantName: string;
     unreadNotificationCount: number;
-    userAvatar: string;
     avatarFallback: string;
 }
 
-const AuthNavbar = ({tenantName, unreadNotificationCount, userAvatar, avatarFallback}: AuthNavbarProps) => {
+const AuthNavbar = ({tenantName, unreadNotificationCount, avatarFallback}: AuthNavbarProps) => {
   return (
     <div className="w-full bg-white flex justify-between items-center px-4 py-2 pb-3 border-b border-gray-100 ">
         <div>

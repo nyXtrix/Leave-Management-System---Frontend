@@ -1,5 +1,5 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { UserProfile } from '../../types/auth';
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { UserProfile } from "../../types/auth.types";
 
 interface UserState {
   profile: UserProfile | null;
@@ -10,7 +10,7 @@ const initialState: UserState = {
 };
 
 const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
   reducers: {
     setProfile: (state, action: PayloadAction<UserProfile>) => {
@@ -24,4 +24,3 @@ const userSlice = createSlice({
 
 export const { setProfile, clearProfile } = userSlice.actions;
 export default userSlice.reducer;
-

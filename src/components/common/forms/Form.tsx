@@ -6,16 +6,19 @@ import {
   type FieldValues,
   type UseFormProps,
   type SubmitHandler,
+  type Resolver,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { ZodType } from "zod";
+import type { ZodSchema } from "zod";
 
 interface FormProps<T extends FieldValues> {
-  schema: ZodType<T>;
+  schema: ZodSchema<T>;
   onSubmit: (data: T, methods: UseFormReturn<T>) => void | Promise<void>;
-  children: (methods: UseFormReturn<T>) => React.ReactNode;
+  children: React.ReactNode;
   defaultValues?: UseFormProps<T>["defaultValues"];
   className?: string;
+  methods?: UseFormReturn<T>;
+  id?: string;
 }
 
 export const Form = <T extends FieldValues>({
@@ -24,26 +27,28 @@ export const Form = <T extends FieldValues>({
   children,
   defaultValues,
   className,
+  methods: externalMethods,
+  id,
 }: FormProps<T>) => {
-  // @ts-expect-error - React hook form covariance narrowing
-  const methods: UseFormReturn<T> = useForm<T>({
-    // @ts-expect-error - Zod generic input inference conflicts with tight form constraints
-    resolver: zodResolver(schema),
+  const internalMethods = useForm<T>({
+    resolver: zodResolver(schema as Parameters<typeof zodResolver>[0]) as Resolver<T>,
     defaultValues,
   });
 
-  const handleSubmit = (data: T) => onSubmit(data, methods);
+  const methods = (externalMethods || internalMethods) as UseFormReturn<T, object, T>;
+
+  const handleSubmit: SubmitHandler<T> = (data) => onSubmit(data, methods as UseFormReturn<T>);
 
   return (
     <FormProvider {...methods}>
       <form
-        onSubmit={methods.handleSubmit(handleSubmit as SubmitHandler<T>)}
+        id={id}
+        onSubmit={methods.handleSubmit(handleSubmit as Parameters<typeof methods.handleSubmit>[0])}
         className={className}
         noValidate
       >
-        {children(methods)}
+        {children}
       </form>
     </FormProvider>
   );
 };
-

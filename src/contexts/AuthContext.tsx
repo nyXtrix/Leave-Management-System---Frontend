@@ -12,17 +12,22 @@ import {
   setProfile as setReduxProfile,
   clearProfile as clearReduxProfile,
 } from "../store/slices/userSlice";
-import type { UserProfile }  from "../types/auth";
+import type { UserProfile, RegisterCompanyRequest } from "../types/auth.types";
+import type {
+  PermissionModuleId,
+  PermissionAction,
+} from "@/types/permission.types";
 import { authService } from "../services/auth.service";
 
 interface AuthContextType {
   user: UserProfile | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  can: (module: string, action: string) => boolean;
+  can: (module: PermissionModuleId, action: PermissionAction) => boolean;
   login: (email: string, password: string, subdomain?: string) => Promise<void>;
-  register: (payload: any) => Promise<void>;
-  setupUser: (payload: { token: string; password: string }) => Promise<void>;
+  register: (payload: RegisterCompanyRequest) => Promise<void>;
+
+  setupUser: (payload: { token: string; password: string; confirmPassword: string }) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   setProfile: (user: UserProfile) => void;
@@ -57,9 +62,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [checkAuth]);
 
   const can = useCallback(
-    (module: string, action: string): boolean => {
+    (module: PermissionModuleId, action: PermissionAction): boolean => {
       if (!user) return false;
-      return user.permissions[module]?.includes(action) || false;
+      const m = user.permissions[module];
+      return m?.actions?.includes(action) || false;
     },
     [user],
   );
@@ -83,7 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const register = useCallback(
-    async (payload: any) => {
+    async (payload: RegisterCompanyRequest) => {
       setIsLoading(true);
       try {
         const code = await authService.registerCompany(payload);
@@ -101,7 +107,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const setupUser = useCallback(
-    async (payload: { token: string; password: string }) => {
+    async (payload: { token: string; password: string; confirmPassword: string }) => {
       setIsLoading(true);
       try {
         const code = await authService.setPassword(payload);

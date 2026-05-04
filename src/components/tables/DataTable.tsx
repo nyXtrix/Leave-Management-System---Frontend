@@ -1,10 +1,5 @@
-import { useState, useMemo } from "react";
-import {
-  ChevronUp,
-  ChevronDown,
-  ChevronsUpDown,
-  Search,
-} from "lucide-react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { ChevronUp, ChevronDown, ChevronsUpDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/Avatar";
@@ -25,11 +20,39 @@ export function DataTable<T extends { id: string }>({
   onRowClick,
   emptyMessage,
   actions,
+  hidePagination = false,
+  hideHeader = false,
+  maxHeight,
+  hideScrollbar = false,
+  className,
+  getRowId,
+  totalResults,
+  onPageChange,
+  onSearchChange,
+  currentPage,
 }: DataTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<SortDirection>(null);
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
+  const [internalPage, setInternalPage] = useState(1);
+  const page = currentPage ?? internalPage;
+
+  const [searchInput, setSearchInput] = useState("");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      if (onSearchChange) {
+        onSearchChange(searchInput);
+      } else {
+        // Fallback for client-side search (handled in useMemo below)
+        setInternalPage(1);
+      }
+    }, 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchInput, onSearchChange]);
 
   const handleSort = (key: string) => {
     if (sortKey === key) {
@@ -39,12 +62,22 @@ export function DataTable<T extends { id: string }>({
       setSortKey(key);
       setSortDir("asc");
     }
-    setPage(1);
+    handlePageChange(1);
   };
 
+  const handlePageChange = (newPage: number) => {
+    if (onPageChange) {
+      onPageChange(newPage);
+    } else {
+      setInternalPage(newPage);
+    }
+  };
+
+  // Client-side filtering logic
   const filtered = useMemo(() => {
-    if (!search || searchKeys.length === 0) return data;
-    const q = search.toLowerCase();
+    if (totalResults !== undefined || !searchInput || searchKeys.length === 0)
+      return data;
+    const q = searchInput.toLowerCase();
     return data.filter((row) =>
       searchKeys.some((k) =>
         String(row[k] ?? "")
@@ -52,18 +85,36 @@ export function DataTable<T extends { id: string }>({
           .includes(q),
       ),
     );
-  }, [data, search, searchKeys]);
+  }, [data, searchInput, searchKeys, totalResults]);
 
+  // Client-side sorting logic
   const sorted = useMemo(() => {
-    if (!sortKey || !sortDir) return filtered;
-    return [...filtered].sort((a, b) => {
-      const av = String((a as Record<string, unknown>)[sortKey] ?? "");
-      const bv = String((b as Record<string, unknown>)[sortKey] ?? "");
-      return sortDir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
-    });
-  }, [filtered, sortKey, sortDir]);
+    if (totalResults !== undefined || !sortKey || !sortDir) return filtered;
 
-  const paginated = sorted.slice((page - 1) * pageSize, page * pageSize);
+    const col = columns.find((c) => String(c.key) === sortKey);
+
+    return [...filtered].sort((a, b) => {
+      if (col?.sortFn) {
+        return sortDir === "asc" ? col.sortFn(a, b) : col.sortFn(b, a);
+      }
+      const av = (a as Record<string, unknown>)[sortKey];
+      const bv = (b as Record<string, unknown>)[sortKey];
+      if (typeof av === "number" && typeof bv === "number") {
+        return sortDir === "asc" ? av - bv : bv - av;
+      }
+      const as = String(av ?? "");
+      const bs = String(bv ?? "");
+      return sortDir === "asc" ? as.localeCompare(bs) : bs.localeCompare(as);
+    });
+  }, [filtered, sortKey, sortDir, columns, totalResults]);
+
+  // If totalResults is provided, we assume data is already paginated by the server
+  const paginated =
+    totalResults !== undefined || hidePagination
+      ? sorted
+      : sorted.slice((page - 1) * pageSize, page * pageSize);
+
+  const rowKey = (row: T) => getRowId?.(row) ?? row.id;
 
   const SortIcon = ({ colKey }: { colKey: string }) => {
     if (sortKey !== colKey)
@@ -76,33 +127,33 @@ export function DataTable<T extends { id: string }>({
   };
 
   return (
-    <div className="rounded-xl border border-secondary-200 shadow-soft overflow-hidden">
-      {/* Header */}
-      {(title || searchable) && (
-        <div className="flex items-center justify-between gap-4 px-6 py-5 border-b border-slate-100 bg-slate-50/40">
+    <div
+      className={cn(
+        "rounded-xl border border-secondary-200 shadow-soft overflow-hidden",
+        className,
+      )}
+    >
+      {/* Table Header / Search Bar */}
+      {!hideHeader && (title || searchable) && (
+        <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-slate-100 bg-slate-50/40">
           {title && (
             <div>
-              <h3 className="text-xl font-black tracking-tight text-slate-800">
-                {title || "Table"}
+              <h3 className="text-base font-semibold text-slate-800">
+                {title}
               </h3>
               {subtitle && (
-                <p className="text-[11px] font-bold tracking-widest text-slate-400 mt-1">
-                  {subtitle}
-                </p>
+                <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
               )}
             </div>
           )}
           {searchable && (
-            <div className="ml-auto w-64">
+            <div className="ml-auto w-56">
               <InputWithIcon
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Search…"
                 icon={Search}
-                className="h-9 text-xs"
+                className="h-8 text-xs"
               />
             </div>
           )}
@@ -110,17 +161,26 @@ export function DataTable<T extends { id: string }>({
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div
+        className={cn(
+          "overflow-x-auto",
+          maxHeight && "overflow-y-auto",
+          hideScrollbar &&
+            "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
+        )}
+        style={maxHeight ? { maxHeight } : undefined}
+      >
         <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-secondary-200/60 border-b border-secondary-200">
+          <thead className="bg-secondary-200/60 border-b border-secondary-200 sticky top-0 z-10">
+            <tr>
               {columns.map((col) => (
                 <th
                   key={String(col.key)}
+                  scope="col"
                   className={cn(
-                    "px-6 py-4 text-base font-medium text-secondary-600 whitespace-nowrap",
+                    "px-6 py-3 text-sm font-medium text-secondary-600 whitespace-nowrap",
                     col.sortable &&
-                      "cursor-pointer hover:text-slate-600 select-none transition-colors",
+                      "cursor-pointer hover:text-slate-700 select-none transition-colors",
                   )}
                   style={col.width ? { width: col.width } : undefined}
                   onClick={
@@ -133,10 +193,13 @@ export function DataTable<T extends { id: string }>({
                   </div>
                 </th>
               ))}
-              {actions && <th className="px-6 py-4 w-12" />}
+              {actions && (
+                <th scope="col" className="px-6 py-3 w-[80px] text-right" />
+              )}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-50">
+
+          <tbody className="divide-y divide-slate-100">
             {isLoading ? (
               <SkeletonRows cols={columns.length + (actions ? 1 : 0)} />
             ) : paginated.length === 0 ? (
@@ -144,10 +207,10 @@ export function DataTable<T extends { id: string }>({
             ) : (
               paginated.map((row) => (
                 <tr
-                  key={row.id}
+                  key={rowKey(row)}
                   onClick={() => onRowClick?.(row)}
                   className={cn(
-                    "group transition-colors hover:bg-secondary-200/30 border-b border-secondary-200",
+                    "group transition-colors hover:bg-secondary-200/30 border-b border-secondary-100",
                     onRowClick && "cursor-pointer",
                   )}
                 >
@@ -156,11 +219,11 @@ export function DataTable<T extends { id: string }>({
                       String(col.key)
                     ];
                     return (
-                      <td key={String(col.key)} className="px-6 py-4">
+                      <td key={String(col.key)} className="px-6 py-3">
                         {col.render ? (
                           col.render(rawVal, row)
                         ) : (
-                          <span className="text-sm font-medium text-slate-700">
+                          <span className="text-sm text-slate-700">
                             {String(rawVal ?? "—")}
                           </span>
                         )}
@@ -168,7 +231,9 @@ export function DataTable<T extends { id: string }>({
                     );
                   })}
                   {actions && (
-                    <td className="px-6 py-4 text-right">{actions(row)}</td>
+                    <td className="px-6 py-3 w-[80px] text-right">
+                      {actions(row)}
+                    </td>
                   )}
                 </tr>
               ))
@@ -178,12 +243,12 @@ export function DataTable<T extends { id: string }>({
       </div>
 
       {/* Pagination */}
-      {!isLoading && (
-        <Pagination 
-          page={page} 
-          totalResults={sorted.length} 
-          pageSize={pageSize} 
-          onPageChange={setPage} 
+      {!isLoading && !hidePagination && (
+        <Pagination
+          page={page}
+          totalResults={totalResults ?? sorted.length}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
         />
       )}
     </div>

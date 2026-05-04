@@ -2,6 +2,8 @@ import { z } from "zod";
 
 export const RegisterValidationSchema = z
   .object({
+    FirstName: z.string().min(3, "First name must be at least 3 characters"),
+    LastName: z.string().min(3, "Last name must be at least 3 characters"),
     AdminPassword: z
       .string()
       .min(6, "Security infrastructure requires at least 6 characters"),

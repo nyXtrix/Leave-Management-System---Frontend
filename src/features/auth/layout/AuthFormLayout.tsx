@@ -30,7 +30,7 @@ const AuthFormLayout = ({
       {/* Right: Interaction Area */}
       <div className="w-full flex-1 flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-[500px]">
-          <div className="relative bg-white/40 glass border border-primary-100 rounded-[2.5rem] shadow-premium p-8 md:p-12 transition-all duration-300">
+          <div className="relative bg-white/40 glass border border-primary-100 rounded-xl shadow-premium p-8 md:p-12 transition-all duration-300">
             {/* Header / Brand Area (Optional) */}
             <div className="absolute top-0 right-0 h-32 w-32 bg-primary-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
             

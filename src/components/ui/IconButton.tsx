@@ -8,6 +8,7 @@ interface IconButtonProps extends ButtonProps {
   icon?: LucideIcon;
   iconPosition?: "right" | "left";
   className?: string;
+  iconStrokeWidth?: number;
 }
 
 const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
@@ -18,6 +19,7 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
       iconPosition = "left",
       children,
       className,
+      iconStrokeWidth,
       ...buttonProps
     },
     ref
@@ -35,7 +37,7 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         {children}
 
         {iconPosition === "right" && Icon && (
-          <Icon className={cn("h-5 w-5", iconClassName)} />
+          <Icon className={cn("h-5 w-5", iconClassName)} strokeWidth={iconStrokeWidth || 2} />
         )}
       </Button>
     );

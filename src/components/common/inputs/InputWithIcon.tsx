@@ -4,14 +4,14 @@ import { Input, type InputProps } from "./Input";
 import { cn } from "@/lib/utils";
 
 interface InputWithIconProps extends InputProps {
-  icon: LucideIcon;
+  icon?: LucideIcon;
   iconPosition?: "left" | "right";
   iconClassName?: string;
 }
 
 const InputWithIcon = React.forwardRef<HTMLInputElement, InputWithIconProps>(
   ({ icon: Icon, iconPosition = "left", iconClassName, ...props }, ref) => {
-    const iconNode = (
+    const iconNode = Icon && (
       <Icon 
         className={cn(
           "h-5 w-5 text-slate-400 group-focus-within/input:text-primary-500 transition-colors", 

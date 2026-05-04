@@ -1,5 +1,7 @@
 import React from "react";
 import * as z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, ArrowRight } from "lucide-react";
 import { Button, cn } from "@/components/ui/Button";
 import MultiStepFlow from "@/components/common/multistep-flow/MultiStepFlow";
@@ -27,9 +29,6 @@ interface LoginFormProps {
   className?: string;
 }
 
-/**
- * Step 0: Email Entry Component
- */
 const EmailStep = ({ 
   onSubmit, 
   defaultEmail, 
@@ -38,14 +37,21 @@ const EmailStep = ({
   onSubmit: (data: EmailFormData) => Promise<void>, 
   defaultEmail: string,
   isLoading: boolean
-}) => (
-  <Form
-    schema={emailSchema}
-    onSubmit={onSubmit}
-    defaultValues={{ email: defaultEmail }}
-    className="space-y-6"
-  >
-    {({ formState: { isSubmitting } }) => (
+}) => {
+  const methods = useForm<EmailFormData>({
+    resolver: zodResolver(emailSchema),
+    defaultValues: { email: defaultEmail },
+  });
+
+  const { formState: { isSubmitting } } = methods;
+
+  return (
+    <Form
+      schema={emailSchema}
+      methods={methods}
+      onSubmit={onSubmit}
+      className="space-y-6"
+    >
       <div className="space-y-6">
         <FormInput
           name="email"
@@ -65,13 +71,10 @@ const EmailStep = ({
           <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
         </Button>
       </div>
-    )}
-  </Form>
-);
+    </Form>
+  );
+};
 
-/**
- * Step 1: Password Verification Component
- */
 const PasswordStep = ({
   onSubmit,
   email,
@@ -82,13 +85,20 @@ const PasswordStep = ({
   email: string,
   tenantInfo: { name: string } | null,
   isLoading: boolean
-}) => (
-  <Form
-    schema={passwordSchema}
-    onSubmit={onSubmit}
-    className="space-y-6"
-  >
-    {({ formState: { isSubmitting } }) => (
+}) => {
+  const methods = useForm<PasswordFormData>({
+    resolver: zodResolver(passwordSchema),
+  });
+
+  const { formState: { isSubmitting } } = methods;
+
+  return (
+    <Form
+      schema={passwordSchema}
+      methods={methods}
+      onSubmit={onSubmit}
+      className="space-y-6"
+    >
       <div className="space-y-6">
         <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100 mb-2">
           <div className="h-10 w-10 rounded-xl bg-primary-50 flex items-center justify-center">
@@ -129,9 +139,9 @@ const PasswordStep = ({
           <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
         </Button>
       </div>
-    )}
-  </Form>
-);
+    </Form>
+  );
+};
 
 const LoginForm = ({
   step,

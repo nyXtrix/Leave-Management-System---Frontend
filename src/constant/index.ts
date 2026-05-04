@@ -1,5 +1,5 @@
 import type { HomeNavSection } from "@/types/utils";
-import type { UserProfile } from "@/types/auth";
+import type { UserProfile } from "@/types/auth.types";
 import {
   LayoutDashboard,
   CalendarRange,
@@ -21,22 +21,19 @@ import {
   Briefcase,
   Network,
   Rocket,
+  CalendarDays,
+  User,
 } from "lucide-react";
-
-export const APP_CONFIG = {
-  name: "Leavr Cloud OS",
-  version: "2.0.0",
-  apiPrefix: "/api/v1",
-  defaultTenantId: "acme-01",
-};
 
 export const ROUTES = {
   dashboard: "/",
   leaves: "/leaves",
   approvals: "/approvals",
   employees: "/employees",
-  settings: "/settings",
+  profile: "/profile",
   orgChart: "/organization",
+  team: "/team",
+  calendar: "/calendar",
 };
 
 export const LEAVE_TYPES = {
@@ -102,27 +99,74 @@ export const getSidebarRoutes = (user: UserProfile | null) => {
 
   const sections: { title: string; items: any[] }[] = [];
 
-  sections.push({
-    title: "Overview",
-    items: [
-      { label: "Dashboard", to: `${primaryRoute}/dashboard`, icon: LayoutDashboard },
-      { label: "My Leaves", to: `${primaryRoute}/leaves`, icon: CalendarRange },
-      { label: "Organization", to: `${primaryRoute}/organization`, icon: Network },
-    ],
-  });
+  const overviewItems = [];
+  if (
+    permissions["DASHBOARD"]?.actions?.includes("VIEW") ||
+    !permissions["DASHBOARD"]
+  ) {
+    overviewItems.push({
+      label: "Dashboard",
+      to: `${primaryRoute}/dashboard`,
+      icon: LayoutDashboard,
+    });
+  }
+  if (permissions["MY_LEAVES"]?.actions?.includes("VIEW")) {
+    overviewItems.push({
+      label: "My Leaves",
+      to: `${primaryRoute}/leaves`,
+      icon: CalendarRange,
+    });
+  }
+  if (permissions["ORGANIZATION"]?.actions?.includes("VIEW")) {
+    overviewItems.push({
+      label: "Organization",
+      to: `${primaryRoute}/organization`,
+      icon: Network,
+    });
+  }
+  if (permissions["TEAM"]?.actions?.includes("VIEW")) {
+    overviewItems.push({
+      label: "Team",
+      to: `${primaryRoute}/team`,
+      icon: Users2,
+    });
+  }
+  if (permissions["CALENDAR"]?.actions?.includes("VIEW")) {
+    overviewItems.push({
+      label: "Calendar",
+      to: `${primaryRoute}/calendar`,
+      icon: CalendarDays,
+    });
+  }
+
+  if (overviewItems.length > 0) {
+    sections.push({
+      title: "Overview",
+      items: overviewItems,
+    });
+  }
 
   const managementItems = [];
-  
-  if (permissions['policy']?.includes('view')) {
-    managementItems.push({ label: "Leave Policy", to: `${primaryRoute}/policy`, icon: ShieldCheck });
+  if (permissions["POLICY"]?.actions?.includes("VIEW")) {
+    managementItems.push({
+      label: "Leave Policy",
+      to: `${primaryRoute}/policy`,
+      icon: ShieldCheck,
+    });
   }
-
-  if (permissions['leave_mgmt']?.includes('view')) {
-    managementItems.push({ label: "Leave Management", to: `${primaryRoute}/leave-management`, icon: Sparkles });
+  if (permissions["LEAVE_MGMT"]?.actions?.includes("VIEW")) {
+    managementItems.push({
+      label: "Leave Management",
+      to: `${primaryRoute}/leave-management`,
+      icon: Sparkles,
+    });
   }
-
-  if (permissions['employee_mgmt']?.includes('view')) {
-    managementItems.push({ label: "Manage Employees", to: `${primaryRoute}/employees`, icon: Users });
+  if (permissions["EMPLOYEE_MGMT"]?.actions?.includes("VIEW")) {
+    managementItems.push({
+      label: "Manage Employees",
+      to: `${primaryRoute}/employees`,
+      icon: Users,
+    });
   }
 
   if (managementItems.length > 0) {
@@ -132,16 +176,28 @@ export const getSidebarRoutes = (user: UserProfile | null) => {
     });
   }
 
-  const toolItems = [
-    { label: "Approvals", to: `${primaryRoute}/approvals`, icon: ClipboardCheck },
-    { label: "Settings", to: `${primaryRoute}/settings`, icon: Settings },
-  ];
+  const toolItems = [];
+  if (permissions["APPROVALS"]?.actions?.includes("VIEW")) {
+    toolItems.push({
+      label: "Approvals",
+      to: `${primaryRoute}/approvals`,
+      icon: ClipboardCheck,
+    });
+  }
+  if (permissions["PROFILE"]?.actions?.includes("VIEW")) {
+    toolItems.push({
+      label: "Profile",
+      to: `${primaryRoute}/profile`,
+      icon: User,
+    });
+  }
 
-  sections.push({
-    title: "Operational",
-    items: toolItems,
-  });
+  if (toolItems.length > 0) {
+    sections.push({
+      title: "Operational",
+      items: toolItems,
+    });
+  }
 
   return sections;
 };
-
