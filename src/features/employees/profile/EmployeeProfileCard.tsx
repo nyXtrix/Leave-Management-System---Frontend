@@ -1,5 +1,5 @@
+import React, { useState } from "react";
 import IconButton from "@/components/ui/IconButton";
-import type { UserProfile } from "@/types/auth.types";
 import {
   UserRound,
   Mail,
@@ -7,23 +7,137 @@ import {
   SquarePen,
   UserCheck,
   VenusAndMars,
+  MoreVertical,
+  Pencil,
+  Send,
+  UserX,
+  AlertCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
+import Modal from "@/components/ui/Modal";
+import { invitationService } from "@/services/invitation.service";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/DropdownMenu";
+import { UserStatus } from "@/types/auth.types";
+import EditProfileModal from "./components/EditProfileModal";
+import { useModulePermissions } from "@/hooks/usePermission";
+
+export interface ProfileBasicInfo {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  gender: number;
+  status: number;
+  role: string;
+  roleId: string;
+  department?: string | null;
+  departmentId?: string | null;
+  managerName?: string | null;
+  managerId?: string | null;
+}
 
 interface EmployeeProfileCardProps {
-  employee: UserProfile;
+  employee: ProfileBasicInfo;
 }
 
 const EmployeeProfileCard = ({ employee }: EmployeeProfileCardProps) => {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isResendModalOpen, setIsResendModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isActionLoading, setIsActionLoading] = useState(false);
+  const { canUpdate, canCreate } = useModulePermissions("EMPLOYEE_MGMT");
+
+  const isPending = employee.status === UserStatus.Pending;
+  const isInactive = employee.status === UserStatus.InActive;
+
+  const handleResendInvitation = () => {
+    setIsActionLoading(true);
+    invitationService.resendInvitation(employee.id)
+      .then(() => setIsResendModalOpen(false))
+      .finally(() => setIsActionLoading(false));
+  };
+
+  const handleCancelInvitation = () => {
+    setIsActionLoading(true);
+    invitationService.cancelInvitation(employee.id)
+      .then(() => setIsCancelModalOpen(false))
+      .finally(() => setIsActionLoading(false));
+  };
 
   return (
     <div className="relative w-full h-full bg-white rounded-xl border border-secondary-200 shadow-sm flex flex-col p-8 animate-reveal">
-      <IconButton
-        icon={SquarePen}
-        size="sm"
-        variant="ghost"
-        className="absolute top-6 right-6 p-2 hover:bg-secondary-50 transition-all text-secondary-500"
-      />
+      {(canUpdate || canCreate) && (
+        <div className="absolute top-6 right-6">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <IconButton
+                icon={MoreVertical}
+                size="sm"
+                variant="ghost"
+                className="p-2 hover:bg-secondary-50 transition-all text-secondary-500"
+              />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[180px] rounded-xl border-secondary-200">
+              {canUpdate && (
+                <DropdownMenuItem asChild onClick={() => setIsEditModalOpen(true)}>
+                  <IconButton 
+                    icon={Pencil} 
+                    variant="ghost" 
+                    className="w-full justify-start p-2"
+                    iconClassName="h-4 w-4"
+                  >
+                    Edit Profile
+                  </IconButton>
+                </DropdownMenuItem>
+              )}
+              
+              {canCreate && isInactive && (
+                <DropdownMenuItem asChild onClick={() => setIsResendModalOpen(true)}>
+                  <IconButton 
+                    icon={Send} 
+                    variant="ghost" 
+                    className="w-full justify-start p-2"
+                    iconClassName="h-4 w-4"
+                  >
+                    Invite User
+                  </IconButton>
+                </DropdownMenuItem>
+              )}
+
+
+              {canCreate && isPending && (
+                <>
+                  <DropdownMenuItem asChild onClick={() => setIsResendModalOpen(true)}>
+                    <IconButton 
+                      icon={Send} 
+                      variant="ghost" 
+                      className="w-full justify-start p-2"
+                      iconClassName="h-4 w-4"
+                    >
+                      Resend Invite
+                    </IconButton>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild onClick={() => setIsCancelModalOpen(true)}>
+                    <IconButton 
+                      icon={UserX} 
+                      variant="ghost" 
+                      className="w-full justify-start p-2 text-rose-500 hover:text-rose-600 hover:bg-rose-50"
+                      iconClassName="h-4 w-4"
+                    >
+                      Cancel Invite
+                    </IconButton>
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
 
       <div className="flex flex-col items-center text-center space-y-5">
         <div className="p-6 rounded-full bg-linear-to-br from-primary-500 to-primary-600">
@@ -39,16 +153,65 @@ const EmployeeProfileCard = ({ employee }: EmployeeProfileCardProps) => {
           </p>
           <div className="flex items-center justify-center gap-2 mt-2">
             <Badge
-              variant={employee.status === 1 ? "success" : "default"}
+              variant={
+                employee.status === UserStatus.Activated 
+                  ? "success" 
+                  : employee.status === UserStatus.Pending 
+                    ? "warning" 
+                    : "default"
+              }
               className="px-3"
             >
-              {employee.status === 1 ? "Active" : "Inactive"}
+              {employee.status === UserStatus.Activated 
+                ? "Active" 
+                : employee.status === UserStatus.Pending 
+                  ? "Pending" 
+                  : "Inactive"}
             </Badge>
           </div>
         </div>
       </div>
 
       <div className="mt-4 border-t border-secondary-300/80" />
+
+      <EditProfileModal 
+        isOpen={isEditModalOpen} 
+        onClose={() => setIsEditModalOpen(false)} 
+        employee={employee} 
+      />
+
+      <Modal
+        isOpen={isResendModalOpen}
+        onClose={() => setIsResendModalOpen(false)}
+        title="Resend Invitation"
+        description={`Are you sure you want to resend the invitation email to ${employee.firstName} ${employee.lastName}?`}
+        primaryBtnText="Resend"
+        primaryBtnIcon={Send}
+        primaryBtnLoading={isActionLoading}
+        onConfirm={handleResendInvitation}
+      >
+        <div className="flex items-center gap-3 p-4 bg-primary-50 text-secondary-500 rounded-xl border border-primary-100">
+          <Mail className="h-5 w-5 text-primary-600" />
+          <p className="text-sm font-medium">This will send a new invitation link to <span className="font-semibold text-primary-500">{employee.email}</span>.</p>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        title="Cancel Invitation"
+        description={`Are you sure you want to cancel the invitation for ${employee.firstName} ${employee.lastName}?`}
+        primaryBtnText="Cancel Invitation"
+        primaryBtnIcon={UserX}
+        primaryBtnClassName="bg-rose-500 hover:bg-rose-600 border-rose-500"
+        primaryBtnLoading={isActionLoading}
+        onConfirm={handleCancelInvitation}
+      >
+        <div className="flex items-center gap-3 p-4 bg-rose-50 text-rose-700 rounded-xl border border-rose-100">
+          <AlertCircle className="h-5 w-5" />
+          <p className="text-sm font-medium">This action will deactivate the invitation link and remove the pending employee record.</p>
+        </div>
+      </Modal>
 
       <div className="flex-1">
         <div className="space-y-2">

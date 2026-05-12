@@ -64,6 +64,7 @@ const RegisterManagement = () => {
         await setupUser({
           token,
           password: data.AdminPassword,
+          confirmPassword: data.ConfirmPassword,
         });
       }
     } catch {

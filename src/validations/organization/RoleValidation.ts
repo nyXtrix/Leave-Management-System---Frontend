@@ -14,7 +14,7 @@ export const RoleValidation = z.object({
     .min(3, "Role description must be at least 3 characters long")
     .max(100, "Role description must be at most 100 characters long"),
   permissions: z.array(z.string()),
-  scopes: z.record(z.string(), z.nativeEnum(PermissionScope)).optional(),
+  scopes: z.record(z.string(), z.union([z.nativeEnum(PermissionScope), z.literal("")])).optional(),
 });
 
 export type RoleFormData = z.infer<typeof RoleValidation>;

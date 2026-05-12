@@ -17,7 +17,7 @@ const Navbar = ({ className, children }: NavbarProps) => {
   return (
     <nav
       className={cn(
-        "sticky top-0 z-50 w-full border-b border-slate-200/60 bg-white/95 backdrop-blur supports-backdrop-filter:bg-white/60 flex items-center justify-between py-1 select-none",
+        "sticky top-0 z-50 w-full border-b border-slate-200/60 flex items-center justify-between py-1 select-none",
         className,
       )}
     >

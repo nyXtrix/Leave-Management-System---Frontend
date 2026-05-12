@@ -1,51 +1,46 @@
 import React from "react";
 import { Plus, Filter } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import SelectInput from "@/components/common/inputs/SelectInput";
 import type { CalendarFilterValue } from "../types";
+import IconButton from "@/components/ui/IconButton";
+import { CALENDER_EVENT_FILTER } from "@/constant";
 
 interface CalendarFiltersProps {
   activeFilter: CalendarFilterValue;
   onFilterChange: (val: string | number) => void;
   onAddHoliday: () => void;
+  canCreate: boolean;
 }
-
-const FILTER_OPTIONS = [
-  { label: "All Events", value: "ALL" },
-  { label: "Team Leaves", value: "TEAM" },
-  { label: "My Reportees", value: "REPORTEES" },
-  { label: "Organization Holidays", value: "HOLIDAY" },
-];
 
 export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
   activeFilter,
   onFilterChange,
   onAddHoliday,
+  canCreate,
 }) => {
   return (
-    <div className="flex items-center gap-3 w-full md:w-auto">
-      <div className="w-[200px]">
+    <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+      <div className="flex-1 sm:w-[200px]">
         <SelectInput
-          options={FILTER_OPTIONS}
+          options={CALENDER_EVENT_FILTER}
           value={activeFilter}
           onChange={onFilterChange}
-          placeholder="Filter view"
+          placeholder="Filter"
           icon={Filter}
-          size="sm"
-          className="rounded-xl border-slate-200"
+          className="rounded-xl border-slate-200 h-9 sm:h-11 text-xs sm:text-sm"
         />
       </div>
 
-      <Button
-        variant="default"
-        className="rounded-2xl h-9 bg-slate-900 border-primary-500/20 shadow-glow-primary gap-2 px-6 shrink-0"
-        onClick={onAddHoliday}
-      >
-        <Plus className="h-4 w-4" />
-        <span className="text-xs font-black uppercase tracking-widest">
-          Add Holiday
-        </span>
-      </Button>
+      {canCreate && (
+        <IconButton
+          icon={Plus}
+          variant="default"
+          onClick={onAddHoliday}
+          className="h-9 sm:h-11 px-3 sm:px-6 shrink-0"
+        >
+          <span className="hidden sm:inline">Add Holiday</span>
+        </IconButton>
+      )}
     </div>
   );
 };

@@ -17,7 +17,7 @@ const PageLayout = ({ title, children, className }: PageLayoutProps) => {
   return (
     <div
       className={cn(
-        "relative space-y-4 p-4 m-4 rounded-xl bg-white h-full min-h-[calc(100vh-100px)] overflow-y-auto",
+        "relative flex flex-col m-4 p-4 rounded-xl bg-white h-[calc(100vh-100px)] border overflow-y-scroll",
         className,
       )}
     >
@@ -26,12 +26,16 @@ const PageLayout = ({ title, children, className }: PageLayoutProps) => {
           <Loader />
         </div>
       )}
+      
       {title && (
-        <h1 className="text-3xl font-semibold text-secondary-600 tracking-tight border-b pb-2 border-gray-300">
-          {title}
-        </h1>
+        <div className="shrink-0 px-6 py-2 mb-4 border-b border-gray-100">
+          <h1 className="text-3xl font-semibold text-secondary-600 tracking-tight">
+            {title}
+          </h1>
+        </div>
       )}
-      <div className="animate-reveal max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-hide">
+
+      <div className="flex-1 min-h-0 relative flex flex-col">
         {children}
       </div>
     </div>

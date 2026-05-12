@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";
+import IconButton from "@/components/ui/IconButton";
 import InputWithIcon from "@/components/common/inputs/InputWithIcon";
 import { Textarea } from "@/components/ui/Textarea";
 import {
@@ -191,9 +192,9 @@ export function ApplyLeaveDialog({ open, onClose }: ApplyLeaveDialogProps) {
             <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit" isLoading={isSubmitting} icon={FileText}>
+            <IconButton type="submit" isLoading={isSubmitting} icon={FileText}>
               Submit Request
-            </Button>
+            </IconButton>
           </DialogFooter>
         </form>
       </DialogContent>

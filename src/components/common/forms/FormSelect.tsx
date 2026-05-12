@@ -19,7 +19,12 @@ export const FormSelect = ({ name, ...props }: FormSelectProps) => {
           {...field}
           value={field.value ?? ""}
           error={error?.message}
-          onChange={(val) => field.onChange(val)}
+          onChange={(val) => {
+            field.onChange(val);
+            if (props.onChange) {
+              (props.onChange as (val: string | number) => void)(val);
+            }
+          }}
         />
       )}
     />

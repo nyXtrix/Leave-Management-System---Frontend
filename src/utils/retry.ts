@@ -10,13 +10,13 @@ export const withRetry = async <T>(
 ): Promise<T> => {
   const { maxRetries = 3, baseDelay = 1000, maxDelay = 5000 } = options;
 
-  let lastError: any;
+  let lastError: Error = new Error("Retry failed");
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await fn();
     } catch (error) {
-      lastError = error;
+      lastError = error instanceof Error ? error : new Error(String(error));
       
       if (attempt === maxRetries) break;
 

@@ -6,11 +6,13 @@ import type {
   RegisterCompanyRequest,
   UserProfile,
 } from "../types/auth.types";
-import { PermissionScope } from "../types/permission.types";
+import type {
+  AppPermissions,
+  ApiPermissions,
+  PermissionAction,
+  PermissionModuleId,
+} from "../types/permission.types";
 
-/**
- * Mappers to reconcile backend numeric enums with frontend string constants
- */
 const MAP_ACTION = (action: string | number): string => {
   const actions: Record<number, string> = {
     0: "VIEW",
@@ -23,12 +25,12 @@ const MAP_ACTION = (action: string | number): string => {
   return typeof action === "number" ? actions[action] : action;
 };
 
-const transformPermissions = (apiPermissions: any): any => {
-  const permissions: any = {};
+const transformPermissions = (apiPermissions: ApiPermissions): AppPermissions => {
+  const permissions: AppPermissions = {};
   if (apiPermissions) {
-    Object.entries(apiPermissions).forEach(([moduleId, modulePerms]: [string, any]) => {
-      permissions[moduleId] = {
-        actions: modulePerms.actions ? modulePerms.actions.map(MAP_ACTION) : [],
+    Object.entries(apiPermissions).forEach(([moduleId, modulePerms]) => {
+      permissions[moduleId as PermissionModuleId] = {
+        actions: modulePerms.actions ? modulePerms.actions.map(a => MAP_ACTION(a) as PermissionAction) : [],
         scope: modulePerms.scope,
       };
     });
@@ -39,12 +41,17 @@ const transformPermissions = (apiPermissions: any): any => {
 export const authService = {
   async identify(payload: {
     email: string;
-  }): Promise<{ subdomain: string | null; status: number; exists: boolean }> {
+  }): Promise<{ subdomain: string | null; companyName: string | null; status: number; exists: boolean }> {
     return await BaseRequestProvider.post<{
       subdomain: string | null;
+      companyName: string | null;
       status: number;
       exists: boolean;
-    }>("/auth/authentication/identify", payload);
+    }>("/auth/authentication/identify", payload,
+      {
+        showErrorToast:true
+      }
+    );
   },
 
   async login(payload: LoginRequest, subdomain?: string): Promise<string> {
@@ -141,7 +148,7 @@ export const authService = {
     confirmPassword: string;
   }): Promise<string> {
     const res = await BaseRequestProvider.post<{ exchangeCode: string }>(
-      "/auth/invitation/set-password",
+      "/organization/invitation/set-password",
       payload,
     );
     return res.exchangeCode;
@@ -157,7 +164,7 @@ export const authService = {
     departmentId: string;
   }): Promise<{ inviteToken: string }> {
     return await BaseRequestProvider.post<{ inviteToken: string }>(
-      "/auth/invitation/invite",
+      "/organization/invitation/invite",
       {
         email: payload.email,
         firstName: payload.firstName,
@@ -177,7 +184,7 @@ export const authService = {
 
   async verifyOnboardingToken(token: string): Promise<UserProfile> {
     const res = await BaseRequestProvider.get<AuthMeResponse>(
-      `/auth/invitation/invite-details?token=${token}`,
+      `/organization/invitation/invite-details?token=${token}`,
     );
 
     return {
@@ -204,16 +211,48 @@ export const authService = {
   ): Promise<void> {
     const headers = subdomain ? { "X-Tenant-Subdomain": subdomain } : undefined;
     await BaseRequestProvider.post(
-      "/auth/invitation/forgot-password",
+      "/organization/invitation/forgot-password",
       payload,
-      { headers },
+      {
+        headers,
+        showSuccessToast: true,
+        successMessage: "Password reset link has been sent to your email.",
+        showErrorToast: true,
+      },
     );
   },
 
   async resetPassword(payload: {
     token: string;
     password: string;
+    confirmPassword: string;
   }): Promise<void> {
-    await BaseRequestProvider.post("/auth/invitation/reset-password", payload);
+    await BaseRequestProvider.post("/organization/invitation/reset-password", payload, {
+      showSuccessToast: true,
+      successMessage: "Password reset successfully. You can now log in.",
+      showErrorToast: true,
+    });
+  },
+
+  async verifyResetToken(token: string): Promise<any> {
+    const res = await BaseRequestProvider.get<{
+      companyName: string;
+      subdomain: string;
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+    }>(
+      `/organization/invitation/verify-reset-token?token=${token}`,
+    );
+
+    return {
+      id: res.id,
+      firstName: res.firstName || "",
+      lastName: res.lastName || "",
+      email: res.email,
+      subdomain: res.subdomain,
+      companyName: res.companyName,
+    };
   },
 };

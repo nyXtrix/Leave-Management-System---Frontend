@@ -1,61 +1,98 @@
-import BaseRequestProvider from '../lib/api/BaseRequestProvider';
+import BaseRequestProvider from "../lib/api/BaseRequestProvider";
 import type {
   LeaveRequest,
   LeaveBalance,
   ApplyLeavePayload,
-  LeaveFilters,
-  PaginatedResponse,
-} from '../types/leave';
+} from "../types/leave.types";
+import type { PaginatedResult, QueryParams } from "@/types/utils";
+
+export interface LeaveFilters extends QueryParams {
+  status?: string;
+  type?: string;
+  employeeId?: string;
+  from?: string;
+  to?: string;
+}
 
 export const leaveService = {
-  async getMyLeaves(filters?: LeaveFilters): Promise<PaginatedResponse<LeaveRequest>> {
-    const params: Record<string, string> = {};
-    if (filters?.status) params['status'] = filters.status;
-    if (filters?.type) params['type'] = filters.type;
-    if (filters?.from) params['from'] = filters.from;
-    if (filters?.to) params['to'] = filters.to;
-    if (filters?.page) params['page'] = String(filters.page);
-    if (filters?.limit) params['limit'] = String(filters.limit);
-    return BaseRequestProvider.get<PaginatedResponse<LeaveRequest>>('/leaves/my', params);
+  getMyLeaves: (filters?: LeaveFilters) => {
+    const params: Record<string, string> = {
+      page: String(filters?.page || 1),
+      pageSize: String(filters?.pageSize || 10),
+    };
+    if (filters?.status) params["Filters[status]"] = filters.status;
+    if (filters?.type) params["Filters[type]"] = filters.type;
+    if (filters?.from) params["Filters[from]"] = filters.from;
+    if (filters?.to) params["Filters[to]"] = filters.to;
+    if (filters?.searchTerm) params["searchTerm"] = filters.searchTerm;
+
+    return BaseRequestProvider.get<PaginatedResult<LeaveRequest>>(
+      "/leaves/my-leaves",
+      params,
+    );
   },
 
-  async getAllLeaves(filters?: LeaveFilters): Promise<PaginatedResponse<LeaveRequest>> {
-    const params: Record<string, string> = {};
-    if (filters?.status) params['status'] = filters.status;
-    if (filters?.type) params['type'] = filters.type;
-    if (filters?.employeeId) params['employeeId'] = filters.employeeId;
-    if (filters?.from) params['from'] = filters.from;
-    if (filters?.to) params['to'] = filters.to;
-    if (filters?.page) params['page'] = String(filters.page);
-    if (filters?.limit) params['limit'] = String(filters.limit);
-    return BaseRequestProvider.get<PaginatedResponse<LeaveRequest>>('/leaves', params);
+  getAllLeaves: (filters?: LeaveFilters) => {
+    const params: Record<string, string> = {
+      page: String(filters?.page || 1),
+      pageSize: String(filters?.pageSize || 10),
+    };
+    if (filters?.status) params["Filters[status]"] = filters.status;
+    if (filters?.type) params["Filters[type]"] = filters.type;
+    if (filters?.employeeId) params["Filters[employeeId]"] = filters.employeeId;
+    if (filters?.from) params["Filters[from]"] = filters.from;
+    if (filters?.to) params["Filters[to]"] = filters.to;
+    if (filters?.searchTerm) params["searchTerm"] = filters.searchTerm;
+
+    return BaseRequestProvider.get<PaginatedResult<LeaveRequest>>(
+      "/leaves",
+      params,
+    );
   },
 
-  async getLeaveById(id: string): Promise<LeaveRequest> {
-    return BaseRequestProvider.get<LeaveRequest>(`/leaves/${id}`);
+  getLeaveById: (id: string) =>
+    BaseRequestProvider.get<LeaveRequest>(`/leaves/${id}`),
+
+  applyLeave: (payload: ApplyLeavePayload) => {
+    const backendPayload = {
+      LeaveTypeExternalId: payload.type,
+      StartDate: payload.startDate,
+      EndDate: payload.endDate,
+      Reason: payload.notes,
+    };
+    return BaseRequestProvider.post<LeaveRequest>(
+      "/leaves/apply",
+      backendPayload,
+    );
   },
 
-  async applyLeave(payload: ApplyLeavePayload): Promise<LeaveRequest> {
-    return BaseRequestProvider.post<LeaveRequest>('/leaves', payload);
+  approveLeave: (id: string) =>
+    BaseRequestProvider.patch<LeaveRequest>(`/leaves/${id}/approve`),
+
+  rejectLeave: (id: string, reason: string) =>
+    BaseRequestProvider.patch<LeaveRequest>(`/leaves/${id}/reject`, {
+      reason,
+    }),
+
+  cancelLeave: (id: string) => BaseRequestProvider.delete(`/leaves/${id}`),
+
+  getMyBalance: () => BaseRequestProvider.get<LeaveBalance[]>("/leaves/balances"),
+
+  getPendingApprovals: (filters?: QueryParams) => {
+    const params: Record<string, string> = {
+      page: String(filters?.page || 1),
+      pageSize: String(filters?.pageSize || 10),
+    };
+    return BaseRequestProvider.get<PaginatedResult<LeaveRequest>>(
+      "/leaves/pending-approvals",
+      params,
+    );
   },
 
-  async approveLeave(id: string): Promise<LeaveRequest> {
-    return BaseRequestProvider.patch<LeaveRequest>(`/leaves/${id}/approve`);
-  },
-
-  async rejectLeave(id: string, reason: string): Promise<LeaveRequest> {
-    return BaseRequestProvider.patch<LeaveRequest>(`/leaves/${id}/reject`, { reason });
-  },
-
-  async cancelLeave(id: string): Promise<void> {
-    return BaseRequestProvider.delete(`/leaves/${id}`);
-  },
-
-  async getMyBalance(): Promise<LeaveBalance[]> {
-    return BaseRequestProvider.get<LeaveBalance[]>('/leaves/balance/my');
-  },
-
-  async getPendingApprovals(): Promise<PaginatedResponse<LeaveRequest>> {
-    return BaseRequestProvider.get<PaginatedResponse<LeaveRequest>>('/leaves/pending-approvals');
+  calculateDays: (startDate: string, endDate: string) => {
+    return BaseRequestProvider.get<{ days: number }>("/leaves/calculate-days", {
+      startDate,
+      endDate,
+    });
   },
 };

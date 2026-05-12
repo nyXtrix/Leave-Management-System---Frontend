@@ -24,47 +24,67 @@ function isCacheValid<T>(entry: CacheEntry<T>, ttl: number): boolean {
 export function useQuery<T, Args extends any[]>(
   queryFn: (...args: Args) => Promise<T>,
   args: Args,
-  options: { showGlobalLoader?: boolean; ttl?: number } = { showGlobalLoader: true }
+  options: { showGlobalLoader?: boolean; ttl?: number; enabled?: boolean } = {
+    showGlobalLoader: true,
+    enabled: true,
+  },
 ): QueryResult<T> {
   const [data, setData] = useState<T | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<any>(null);
   const { showLoader, hideLoader } = useLoader();
-  const ttl = options.ttl ?? DEFAULT_TTL_MS;
+  const { showGlobalLoader = true, ttl = DEFAULT_TTL_MS, enabled = true } = options;
+  const argsString = JSON.stringify(args);
+  const cacheKey = `${queryFn.name || "anonymous"}__${argsString}`;
 
-  const cacheKey = `${queryFn.name}__${JSON.stringify(args)}`;
+  if (!enabled) {
+    console.warn("useQuery: Fetching is disabled because 'enabled' is false.", { queryFn: queryFn.name, args });
+  }
 
   const forceRefetchRef = useRef(false);
 
-  const fetchData = useCallback(async (force = false) => {
-    if (!force) {
-      const cached = queryCache.get(cacheKey);
-      if (cached && isCacheValid(cached, ttl)) {
-        setData(cached.data as T);
-        return;
+  const fetchData = useCallback(
+    async (force = false) => {
+      if (!force) {
+        const cached = queryCache.get(cacheKey);
+        if (cached && isCacheValid(cached, ttl)) {
+          setData(cached.data as T);
+          return;
+        }
       }
-    }
 
-    setIsLoading(true);
-    if (options.showGlobalLoader) showLoader();
+      setIsLoading(true);
+      if (showGlobalLoader) showLoader();
 
-    try {
-      const result = await queryFn(...args);
-      setData(result);
-      setError(null);
-      queryCache.set(cacheKey, { data: result, timestamp: Date.now() });
-    } catch (err) {
-      setError(err);
-    } finally {
-      setIsLoading(false);
-      if (options.showGlobalLoader) hideLoader();
-    }
-  }, [cacheKey, ttl, options.showGlobalLoader, showLoader, hideLoader, queryFn, JSON.stringify(args)]);
+      try {
+        const result = await queryFn(...args);
+        setData(result);
+        setError(null);
+        queryCache.set(cacheKey, { data: result, timestamp: Date.now() });
+      } catch (err) {
+        setError(err);
+      } finally {
+        setIsLoading(false);
+        if (showGlobalLoader) hideLoader();
+      }
+    },
+    [
+      cacheKey,
+      ttl,
+      showGlobalLoader,
+      showLoader,
+      hideLoader,
+      queryFn,
+      argsString,
+    ],
+  );
 
   useEffect(() => {
-    fetchData(forceRefetchRef.current);
-    forceRefetchRef.current = false;
-  }, [fetchData]);
+    if (enabled) {
+      fetchData(forceRefetchRef.current);
+      forceRefetchRef.current = false;
+    }
+  }, [fetchData, enabled]);
 
   const refetch = useCallback(async () => {
     queryCache.delete(cacheKey);
@@ -83,4 +103,3 @@ export function invalidateQuery(fnName: string, args?: any[]) {
     }
   }
 }
-

@@ -24,18 +24,7 @@ const MultiStepFlow = ({
 
   return (
     <div className="w-full relative space-y-8 px-4">
-      {/* Header Section */}
-      <div className="space-y-3 relative z-10 min-h-[60px] flex flex-col justify-end">
-        {currentStep > 0 && showBackButton && (
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-primary-500 uppercase tracking-widest transition-colors mb-4 group animate-reveal"
-          >
-            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-            Go Back
-          </button>
-        )}
-        
+      <div className="space-y-3 relative z-10 min-h-[60px] flex flex-col justify-end">  
         {currentStepData?.title && (
           <h1 key={`title-${currentStep}`} className="text-4xl font-black text-primary-500 tracking-tight animate-reveal">
             {currentStepData.title}

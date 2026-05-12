@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import ProductInfoManagement from "@/features/product-info/ProductInfoManagement";
 
 export function LandingPage() {
   const { user, isLoading } = useAuth();
@@ -14,9 +15,7 @@ export function LandingPage() {
 
   return (
     <div className="animate-reveal">
-       <div className="flex items-center justify-center min-h-[60vh] text-slate-400 font-bold uppercase tracking-widest">
-          Landing Page
-       </div>
+      <ProductInfoManagement />
     </div>
   );
 }

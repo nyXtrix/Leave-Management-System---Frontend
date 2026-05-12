@@ -1,3 +1,4 @@
+import type { ChartData } from "@/components/charts/BarChart";
 
 export interface DashboardStats {
   totalEmployees: number;
@@ -23,8 +24,60 @@ export interface EmployeeListResponse {
   email: string;
   departmentName: string;
   roleName: string;
+  status: number | string;
+  createdAt: string;
+}
+export type RecentInviteResponse = EmployeeListResponse;
+
+export interface EmployeeDetailResponse extends EmployeeListResponse {
+  managerId: string | null;
+  departmentId: string;
+  gender: number;
+}
+
+export interface BulkUploadStatus {
+  id: string;
+  fileName: string;
+  totalRows: number;
+  processedRows: number;
+  successCount: number;
+  failureCount: number;
   status: number;
+  errorMessage?: string;
+  externalId: string;
   createdAt: string;
 }
 
-export type RecentInviteResponse = EmployeeListResponse;
+export interface EmployeeProfileResponse {
+  employee: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    gender: number;
+    status: number;
+    role: string;
+    roleId: string;
+    roleCode: string;
+    department: string | null;
+    departmentId: string | null;
+    managerName: string | null;
+    managerId: string | null;
+  };
+  leaveBalances: {
+    id: string;
+    label: string;
+    total: number;
+    used: number;
+    available: number;
+    pending: number;
+  }[];
+  requestStatusCounts: {
+    total: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+    cancelled: number;
+  };
+  leaveHistory: ChartData[];
+}

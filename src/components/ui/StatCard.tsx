@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { ArrowRight, type LucideIcon } from 'lucide-react';
-import { Button } from './Button';
 import IconButton from './IconButton';
+import { Skeleton } from './Skeleton';
 
 interface StatCardProps {
   title: string;
@@ -10,6 +10,7 @@ interface StatCardProps {
   icon: LucideIcon;
   className?: string;
   iconClassName?: string;
+  onDetailsClick?: () => void;
 }
 
 export function StatCard({
@@ -19,6 +20,7 @@ export function StatCard({
   icon: Icon,
   className,
   iconClassName,
+  onDetailsClick,
 }: StatCardProps) {
   return (
     <div
@@ -39,7 +41,6 @@ export function StatCard({
           </div>
         </div>
 
-        {/* Bottom Row: Value + Subtitle */}
         <div className='flex justify-between items-end'>
         <div className="space-y-1.5 pt-4">
           <p className="text-3xl  font-bold text-secondary-600 leading-none">
@@ -51,7 +52,29 @@ export function StatCard({
             </p>
           )}
         </div>
-        <IconButton icon={ArrowRight} iconPosition='right' iconClassName='h-4 w-4 p-0' variant="ghost" className='bg-transparent hover:bg-transparent p-0! h-max'>View Details</IconButton>
+        <IconButton onClick={onDetailsClick} icon={ArrowRight} iconPosition='right' iconClassName='h-4 w-4 p-0' variant="ghost" className='bg-transparent hover:bg-transparent p-0! h-max'>View Details</IconButton>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function StatCardSkeleton({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden bg-white rounded-xl p-8 border border-slate-200 shadow-sm min-h-[140px]",
+        className
+      )}
+    >
+      <div className="flex justify-between items-start">
+        <Skeleton className="h-6 w-32 mt-1" />
+        <Skeleton className="h-12 w-12 rounded-2xl shrink-0" />
+      </div>
+      <div className="flex justify-between items-end mt-4">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-16" />
+          <Skeleton className="h-4 w-40" />
         </div>
       </div>
     </div>

@@ -1,21 +1,22 @@
-import { UserPlus } from "lucide-react";
-import EmployeeFilterHeader from "./components/EmployeeFilterHeader";
+import { UserPlus, Building2, GanttChart, UserRound } from "lucide-react";
 import EmployeeCard from "./components/EmployeeCard";
 import IconButton from "@/components/ui/IconButton";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import Pagination from "@/components/tables/Pagination";
 import { useQuery } from "@/hooks/useQuery";
 import { employeeService } from "@/services/employee.service";
 import { useState } from "react";
-import Loader from "@/components/common/Loader";
 import EmptyState from "@/components/common/EmptyState";
-import { UserRound } from "lucide-react";
+import SelectInput from "@/components/common/inputs/SelectInput";
+import { useLookups } from "@/hooks/useLookups";
+import ManagementLayout from "@/components/common/ManagementLayout";
+import { EMPLOYEE_STATUS_OPTIONS } from "@/constant";
 
 const EmployeesManagement = () => {
   const navigate = useNavigate();
   const { subdomain } = useParams();
   const { user } = useAuth();
+  const { departments } = useLookups();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
@@ -23,7 +24,7 @@ const EmployeesManagement = () => {
     status: undefined as number | undefined
   });
 
-  const { data: response, isLoading } = useQuery(
+  const { data: response, isLoading, refetch } = useQuery(
     employeeService.getEmployees,
     [{
       page,
@@ -41,7 +42,7 @@ const EmployeesManagement = () => {
   const handleOnViewClick = (employeeId: string) => {
     const currentSubdomain = subdomain || user?.subdomain;
     if (!currentSubdomain) return;
-    navigate(`/${currentSubdomain}/profile/${employeeId}`);
+    navigate(`/${currentSubdomain}/employee/profile/${employeeId}`);
   };
 
   const handleSearch = (term: string) => {
@@ -49,64 +50,84 @@ const EmployeesManagement = () => {
     setPage(1);
   };
 
+  const deptOptions = [
+    { label: "All Departments", value: "" },
+    ...(departments.data?.map(d => ({ label: d.label, value: d.value })) || [])
+  ];
+
   return (
-    <div className="flex flex-col min-h-[calc(100vh-210px)] animate-reveal">
-      <div className="flex items-center justify-between w-full gap-4 border-b sticky top-0 bg-white z-10 pb-3 mb-6">
-        <EmployeeFilterHeader 
-          onSearch={handleSearch}
-          onFilterChange={(newFilters) => {
-            setFilters(prev => ({ ...prev, ...newFilters }));
-            setPage(1);
-          }}
-        />
-        <div className="border-l pl-4 border-secondary-300">
+    <ManagementLayout
+      headerProps={{
+        onRefresh() {
+          refetch();
+        },
+        onSearch: handleSearch,
+        searchPlaceholder: "Search personnel registry...",
+        filters: (
+          <>
+            <div className="w-48">
+              <SelectInput
+                options={deptOptions}
+                icon={Building2}
+                placeholder="Department"
+                size="sm"
+                onChange={(val) => {
+                  setFilters(prev => ({ ...prev, departmentId: String(val) }));
+                  setPage(1);
+                }}
+              />
+            </div>
+            <div className="w-40">
+              <SelectInput
+                options={EMPLOYEE_STATUS_OPTIONS}
+                placeholder="Status"
+                icon={GanttChart}
+                size="sm"
+                onChange={(val) => {
+                  setFilters(prev => ({ ...prev, status: val === "" ? undefined : Number(val) }));
+                  setPage(1);
+                }}
+              />
+            </div>
+          </>
+        ),
+        actions: (
           <IconButton
             icon={UserPlus}
             onClick={handleOnboardEmployee}
-            className="font-semibold"
+            className="font-semibold shadow-glow-primary"
           >
             Onboard Employee
           </IconButton>
-        </div>
-      </div>
+        )
+      }}
+      paginationProps={{
+        page,
+        totalResults: response?.totalCount || 0,
+        pageSize: 12,
+        onPageChange: setPage,
+      }}
+      isLoading={isLoading && !response}
+    >
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(350px,1fr))] gap-4">
 
-      {isLoading ? (
-        <div className="h-64 flex items-center justify-center flex-1">
-          <Loader />
-        </div>
-      ) : (
-        <>
-          <div className="flex-1">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {response?.items.map((employee) => (
-              <EmployeeCard
-                key={employee.id}
-                employee={employee}
-                onViewClick={handleOnViewClick}
-              />
-            ))}
-            {response?.items.length === 0 && (
-              <EmptyState
-                title="No Employees Found"
-                description="We couldn't find any employees matching your current search or filter criteria. Try adjusting your filters."
-                icon={UserRound}
-                className="col-span-full py-12"
-              />
-            )}
-            </div>
-          </div>
-          <div className="sticky bottom-0 bg-white pt-4 border-t border-slate-100 z-10 mt-auto">
-            <Pagination
-              page={page}
-              totalResults={response?.totalCount || 0}
-              pageSize={12}
-              onPageChange={setPage}
-              className="w-full rounded-b-xl"
-            />
-          </div>
-        </>
-      )}
-    </div>
+        {response?.items.map((employee) => (
+          <EmployeeCard
+            key={employee.id}
+            employee={employee}
+            onViewClick={handleOnViewClick}
+          />
+        ))}
+        {response?.items.length === 0 && (
+          <EmptyState
+            title="No Employees Found"
+            description="We couldn't find any employees matching your current search or filter criteria. Try adjusting your filters."
+            icon={UserRound}
+            className="col-span-full py-12"
+          />
+        )}
+      </div>
+    </ManagementLayout>
   );
 };
 

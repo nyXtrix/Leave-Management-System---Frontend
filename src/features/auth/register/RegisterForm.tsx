@@ -32,6 +32,7 @@ const RegisterForm = ({ inviteMeta, onSubmit }: RegisterFormProps) => {
       FirstName: inviteMeta.firstName || "",
       LastName: inviteMeta.lastName || "",
       AdminPassword: "",
+      ConfirmPassword: "",
       CompanyName: "",
       Subdomain: "",
       email: inviteMeta.email || "",
@@ -62,7 +63,7 @@ const RegisterForm = ({ inviteMeta, onSubmit }: RegisterFormProps) => {
             className="space-y-8"
           >
             <div className="space-y-6">
-              {!inviteMeta.companyName && (
+              {!inviteMeta.companyName ? (
                 <>
                     <FormInput
                       name="CompanyName"
@@ -110,26 +111,62 @@ const RegisterForm = ({ inviteMeta, onSubmit }: RegisterFormProps) => {
                       size="md"
                       rightSection={
                         <span className="text-sm font-bold text-slate-400 group-focus-within/input:text-primary-500 transition-colors mr-2">
-                          .lms.com
+                          .flowoff.com
                         </span>
                       }
                     />
                   </div>
-                  <FormPasswordInput
-                    name="AdminPassword"
-                    label="Create Password"
-                    placeholder="Enter at least 6 characters"
-                    size="md"
-                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormPasswordInput
+                      name="AdminPassword"
+                      label="Create Password"
+                      placeholder="Enter password"
+                      size="md"
+                    />
+                    <FormPasswordInput
+                      name="ConfirmPassword"
+                      label="Confirm Password"
+                      placeholder="Repeat password"
+                      size="md"
+                    />
+                  </div>
                 </>
+              ) : (
+                <div className="space-y-6">
+                  <div className="p-4 bg-primary-50 rounded-2xl border border-primary-100 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+                      <Building2 className="w-5 h-5 text-primary-500" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-primary-600 uppercase tracking-wider">Joining Organization</p>
+                      <p className="text-sm font-black text-slate-700">{inviteMeta.companyName}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormPasswordInput
+                      name="AdminPassword"
+                      label="Create Password"
+                      placeholder="Enter password"
+                      size="md"
+                    />
+                    <FormPasswordInput
+                      name="ConfirmPassword"
+                      label="Confirm Password"
+                      placeholder="Repeat password"
+                      size="md"
+                    />
+                  </div>
+                </div>
               )}
-
+ 
               <Button
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full"
               >
-                {isSubmitting ? "Creating Workspace..." : "Create Workspace"}
+                {isSubmitting 
+                  ? (!inviteMeta.companyName ? "Creating Workspace..." : "Setting up Account...") 
+                  : (!inviteMeta.companyName ? "Create Workspace" : "Complete Registration")}
               </Button>
             </div>
           </Form>

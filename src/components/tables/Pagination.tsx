@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import IconButton from '@/components/ui/IconButton';
 import { Input } from '@/components/common/inputs/Input';
 
-interface PaginationProps {
+export interface PaginationProps {
   page: number;
   totalResults: number;
   pageSize: number;

@@ -21,3 +21,8 @@ export interface QueryParams {
   pageSize?: number;
   searchTerm?: string;
 }
+
+export interface LookupOption {
+  label: string;
+  value: string;
+}

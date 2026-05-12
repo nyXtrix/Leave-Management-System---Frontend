@@ -14,7 +14,7 @@ interface FileUploaderProps {
   accept?: string;
   value?: File | null;
   onChange?: (file: File | null) => void;
-  onConfirm: (file: File) => void;
+  onConfirm?: (file: File) => void;
   className?: string;
   maxSize?: number;
 }

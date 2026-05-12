@@ -4,8 +4,8 @@ import { usePermission } from '@/hooks/usePermission';
 import type { PermissionModuleId, PermissionAction } from '@/types/permission.types';
 
 interface ProtectedRouteProps {
-  moduleId: PermissionModuleId;
-  action?: PermissionAction;
+  moduleId: PermissionModuleId | PermissionModuleId[];
+  action?: PermissionAction | PermissionAction[];
   children: React.ReactNode;
   fallbackRoute?: string;
 }

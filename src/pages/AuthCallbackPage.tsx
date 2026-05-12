@@ -27,11 +27,8 @@ export const AuthCallbackPage = () => {
 
       try {
         await authService.exchangeCode(code);
-        
-        // Cleanup history before state change
         window.history.replaceState({}, '', '/');
 
-        // Refresh user and wait for state update
         await refreshUser();
       } catch (err) {
         console.error('Handshake failure:', err);
@@ -43,7 +40,6 @@ export const AuthCallbackPage = () => {
     performExchange();
   }, [searchParams, navigate, refreshUser]);
 
-  // Handle navigation in a separate effect once user is loaded
   useEffect(() => {
     if (user && !isLoading) {
       navigate(`/${user.subdomain}/dashboard`, { replace: true });

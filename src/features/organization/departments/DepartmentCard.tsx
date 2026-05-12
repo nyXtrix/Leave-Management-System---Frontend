@@ -79,14 +79,14 @@ const DepartmentCard: React.FC<DepartmentCardProps> = ({
     <>
       <div
         className={cn(
-          "group flex flex-col w-full p-5 rounded-lg bg-gray-100/60",
+          "group flex flex-col w-full p-5 rounded-lg bg-linear-to-br from-white to-secondary-200",
           "border border-secondary-200 shadow-premium",
           "hover:shadow-glow-primary transition-all duration-300",
         )}
       >
         <div className="flex items-center gap-3 mb-4">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary-100 text-secondary-700">
-            <Building2 className="h-4 w-4" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100">
+            <Building2 className="h-6 w-6 text-primary-600" />
           </div>
           <div>
             <h3 className="text-base font-semibold text-foreground">
@@ -126,7 +126,7 @@ const DepartmentCard: React.FC<DepartmentCardProps> = ({
             </div>
 
             <span className="text-sm text-secondary-500">
-              {leavePercentage}%
+              {leavePercentage.toFixed(2)}%
             </span>
           </div>
         </div>

@@ -7,11 +7,13 @@ import { useInitializeApp } from "@/hooks/useInitializeApp";
 import { useTokenRefresh } from "@/hooks/useTokenRefresh";
 import Loader from "../common/Loader";
 import InitializationError from "../common/InitializationError";
+import { useNotificationSSE } from "@/features/notification/notification";
 
 export function AppLayout() {
   const { status, retry } = useInitializeApp();
   useTokenRefresh();
-  
+  useNotificationSSE(status === "READY");
+
   const user = useSelector((state: RootState) => state.user.profile);
 
   if (status === "INITIALIZING") {
@@ -31,7 +33,6 @@ export function AppLayout() {
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden relative z-10">
         <AppNavbar
           tenantName={user?.tenantName || "Organization"}
-          unreadNotificationCount={0}
           avatarFallback={user?.firstName ? user.firstName.slice(0, 1).toUpperCase() : "U"}
         />
         <main className="flex-1 overflow-y-auto no-scrollbar h-full w-full">

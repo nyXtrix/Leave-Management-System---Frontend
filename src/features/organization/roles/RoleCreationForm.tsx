@@ -45,21 +45,31 @@ const RoleCreationForm = ({ initialData, onSubmit: onSubmitRole, onStateChange }
           })
         : [],
       scopes: initialData?.permissions
-        ? Object.entries(initialData.permissions as Record<string, { scope: number }>).reduce((acc, [moduleId, module]) => {
-            acc[moduleId] = module.scope as PermissionScope;
+        ? Object.entries(initialData.permissions as Record<string, { scope: string }>).reduce((acc, [moduleId, module]) => {
+            acc[moduleId] = (module.scope as PermissionScope) || PermissionScope.ALL;
             return acc;
           }, {} as Record<string, PermissionScope>)
         : {},
     },
   });
 
-  const { watch, setValue, reset, formState: { isSubmitting, isValid, isDirty } } = methods;
+  const { register, watch, setValue, reset, formState: { isSubmitting, isValid, isDirty } } = methods;
+  const [isManualDirty, setIsManualDirty] = React.useState(false);
+
+  const watchedPermissions = watch("permissions");
+  const watchedScopes = watch("scopes");
 
   useEffect(() => {
-    onStateChange?.({ isValid, isDirty });
-  }, [isValid, isDirty, onStateChange]);
+    register("permissions");
+    register("scopes");
+  }, [register]);
 
   useEffect(() => {
+    onStateChange?.({ isValid, isDirty: isDirty || isManualDirty });
+  }, [isValid, isDirty, isManualDirty, watchedPermissions, watchedScopes, onStateChange]);
+
+  useEffect(() => {
+    setIsManualDirty(false);
     reset({
       name: initialData?.name || "",
       description: initialData?.description || "",
@@ -69,13 +79,13 @@ const RoleCreationForm = ({ initialData, onSubmit: onSubmitRole, onStateChange }
           })
         : [],
       scopes: initialData?.permissions
-        ? Object.entries(initialData.permissions as Record<string, { scope: number }>).reduce((acc, [moduleId, module]) => {
-            acc[moduleId] = module.scope as PermissionScope;
+        ? Object.entries(initialData.permissions as Record<string, { scope: string }>).reduce((acc, [moduleId, module]) => {
+            acc[moduleId] = (module.scope as PermissionScope) || PermissionScope.ALL;
             return acc;
           }, {} as Record<string, PermissionScope>)
         : {},
     });
-  }, [initialData, reset]);
+  }, [initialData?.id, reset]);
 
   const activePermissions = watch("permissions") || [];
   const activeScopes = watch("scopes") || {};
@@ -92,11 +102,15 @@ const RoleCreationForm = ({ initialData, onSubmit: onSubmitRole, onStateChange }
 
   const handlePermissionChange = (newPerms: string[]) => {
     setValue("permissions", newPerms, { shouldDirty: true, shouldValidate: true });
+    setIsManualDirty(true);
+    void methods.trigger("permissions");
   };
 
-  const handleScopeChange = (moduleId: string, scope: PermissionScope) => {
+  const handleScopeChange = (moduleId: string, scope: PermissionScope | "") => {
     const newScopes = { ...activeScopes, [moduleId]: scope };
     setValue("scopes", newScopes, { shouldDirty: true, shouldValidate: true });
+    setIsManualDirty(true);
+    void methods.trigger("scopes");
   };
 
   return (

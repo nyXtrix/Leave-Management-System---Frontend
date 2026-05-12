@@ -1,16 +1,21 @@
 import api from '@/lib/api/BaseRequestProvider';
 
-export interface PendingApproval {
-  externalId: string;
-  userName: string;
-  leaveTypeName: string;
-  totalDays: number;
+export interface ApprovalListResponse {
+  approvalExternalId: string;
+  requestExternalId: string;
+  employeeName: string;
+  leaveType: string;
   startDate: string;
   endDate: string;
+  totalDays: number;
   reason: string;
-  status: string;
-  createdAt: string;
-  sequence: number;
+  appliedAt: string;
+  status: number;
+}
+
+export interface PaginatedResult<T> {
+  items: T[];
+  totalCount: number;
 }
 
 export interface ProcessApprovalRequest {
@@ -25,16 +30,39 @@ export interface ForwardApprovalRequest {
   remarks?: string;
 }
 
+export interface StatCardDto {
+  type: string;
+  title: string;
+  value: string;
+  subtitle: string;
+}
+
+export interface ApprovalStatsResponse {
+  statCards: StatCardDto[];
+}
+
 export const approvalService = {
-  getPendingApprovals: async () => {
-    return api.get<PendingApproval[]>('/Approvals/pending');
+  getApprovals: async (filters: { page: number; pageSize: number; searchTerm?: string; status?: number }) => {
+    const params: Record<string, string> = {
+      page: String(filters.page || 1),
+      pageSize: String(filters.pageSize || 50),
+      searchTerm: filters.searchTerm || "",
+    };
+
+    if (filters.status !== undefined) params["Filters[status]"] = String(filters.status);
+
+    return api.get<PaginatedResult<ApprovalListResponse>>('/approvals', params);
+  },
+
+  getStats: async () => {
+    return api.get<ApprovalStatsResponse>('/approvals/stats');
   },
 
   processApproval: async (data: ProcessApprovalRequest) => {
-    return api.post('/Approvals/process', data);
+    return api.post('/approvals/process', data);
   },
 
   forwardApproval: async (data: ForwardApprovalRequest) => {
-    return api.post('/Approvals/forward', data);
+    return api.post('/approvals/forward', data);
   }
 };

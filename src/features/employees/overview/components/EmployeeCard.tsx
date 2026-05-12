@@ -3,31 +3,49 @@ import IconButton from "@/components/ui/IconButton";
 import type { EmployeeListResponse } from "@/types/employee.types";
 import { UserStatus } from "@/types/auth.types";
 import { ExternalLink, UserRound } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface EmployeeCardProps {
   employee: EmployeeListResponse;
   onViewClick: (employeeId: string) => void;
 }
 const EmployeeCard = ({ employee, onViewClick }: EmployeeCardProps) => {
-  const getStatusInfo = (status: number) => {
-    switch (status) {
-      case UserStatus.Activated:
+  const getStatusInfo = (status: number | string) => {
+    if (typeof status === "number") {
+      switch (status) {
+        case UserStatus.Activated:
+          return { label: "Active", variant: "success" as const };
+        case UserStatus.Pending:
+          return { label: "Pending", variant: "warning" as const };
+        case UserStatus.InActive:
+          return { label: "Inactive", variant: "danger" as const };
+        case UserStatus.Terminated:
+          return { label: "Terminated", variant: "danger" as const };
+        default:
+          return { label: "Unknown", variant: "default" as const };
+      }
+    }
+
+    const s = String(status).toLowerCase();
+    switch (s) {
+      case "activated":
+      case "active":
         return { label: "Active", variant: "success" as const };
-      case UserStatus.Pending:
+      case "pending":
         return { label: "Pending", variant: "warning" as const };
-      case UserStatus.InActive:
+      case "inactive":
         return { label: "Inactive", variant: "danger" as const };
-      case UserStatus.Terminated:
+      case "terminated":
         return { label: "Terminated", variant: "danger" as const };
       default:
-        return { label: "Unknown", variant: "default" as const };
+        return { label: status || "Unknown", variant: "default" as const };
     }
   };
 
   const statusInfo = getStatusInfo(employee.status);
 
   return (
-    <div className="w-full rounded-lg p-4 bg-gray-100/60 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200">
+    <div className="w-full rounded-lg p-4 bg-gray-100/60 shadow-md hover:shadow-xl transition-all duration-300 min-w-80 border border-gray-200">
       <div className="flex justify-between items-start">
         <div className="flex items-center gap-4">
           <div
@@ -48,11 +66,12 @@ const EmployeeCard = ({ employee, onViewClick }: EmployeeCardProps) => {
               />
             </h3>
             <p className="text-sm text-gray-500">{employee.email}</p>
-          </div>
-        </div>
-        <Badge variant={statusInfo.variant} className="mt-2">
+             <Badge variant={statusInfo.variant} className="mt-2 flex justify-center w-max">
           {statusInfo.label}
         </Badge>
+          </div>
+        </div>
+       
       </div>
 
       <div className="my-3 border-t border-gray-300" />

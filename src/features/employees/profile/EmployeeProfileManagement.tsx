@@ -1,112 +1,92 @@
+import { useParams } from "react-router-dom";
+import { useQuery } from "@/hooks/useQuery";
+import { employeeService } from "@/services/employee.service";
 import EmployeeProfileCard from "./EmployeeProfileCard";
 import LeaveBalances from "./leave-stats/leave-balance/LeaveBalances";
 import LeaveHistoryTimeline from "./leave-stats/LeaveHistoryTimeline";
 import LeaveRequestStatusCounts from "./leave-stats/LeaveRequestStatusCounts";
-import type { UserProfile } from "@/types/auth.types";
 
-
-const LEAVE_BALANCES = [
-  {
-    id: "1",
-    type: "CUSTOM",
-    label: "Annual Leave",
-    total: 20,
-    used: 8,
-    available: 12,
-    pending: 0,
-  },
-  {
-    id: "2",
-    type: "SICK",
-    label: "Sick Leave",
-    total: 10,
-    used: 4,
-    available: 6,
-    pending: 0,
-  },
-  {
-    id: "3",
-    type: "CASUAL",
-    label: "Casual Leave",
-    total: 8,
-    used: 2,
-    available: 6,
-    pending: 0,
-  },
-  {
-    id: "4",
-    type: "CUSTOM",
-    label: "Maternity Leave",
-    total: 90,
-    used: 30,
-    available: 60,
-    pending: 0,
-  },
-  {
-    id: "5",
-    type: "CUSTOM",
-    label: "Paternity Leave",
-    total: 15,
-    used: 5,
-    available: 10,
-    pending: 0,
-  },
-  {
-    id: "6",
-    type: "CUSTOM",
-    label: "Holiday Leave",
-    total: 5,
-    used: 1,
-    available: 4,
-    pending: 0,
-  },
-];
-
-const employeeData: UserProfile = {
-  id: "1",
-  firstName: "John",
-  lastName: "Doe",
-  email: "johndoe@flowoff.com",
-  gender: 1, // Male
-  department: "Product Engineering",
-  role: "Lead Software Architect",
-  roleCode: "LSA",
-  managerName: "Sarah Phillips",
-  status: 1, // Active
-  subdomain: "acme-corp",
-  tenantName: "Acme Corporation Ltd.",
-  permissions: {},
-  updatedDate: new Date().toISOString(),
-};
-
-const MOCK_LEAVE_DATA = [
-  { month: "January", Annual: 4, Sick: 1, Casual: 2, Holiday: 1 },
-  { month: "February", Annual: 2, Sick: 3, Paternity: 10 },
-  { month: "March", Annual: 5, Casual: 1 },
-  { month: "April", Sick: 2 },
-  { month: "May", Annual: 8, Casual: 2 },
-  { month: "June", Annual: 3, Sick: 1, Holiday: 1 },
-];
+import { useAuth } from "@/contexts/AuthContext";
+import { useModulePermissions } from "@/hooks/usePermission";
 
 const EmployeeProfileManagement = () => {
-  return (
-      <div className="w-full mt-6 mx-auto grid grid-cols-1 lg:grid-cols-[300px_1fr] xl:grid-cols-[400px_1fr] gap-6 lg:gap-8">
-        <aside className="w-full lg:h-full">
-          <EmployeeProfileCard employee={employeeData} />
-        </aside>
-        <main className="flex flex-col gap-6 lg:gap-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-            <LeaveBalances leaveBalances={LEAVE_BALANCES} />
-            <LeaveRequestStatusCounts
-              total={30}
-              pending={4}
-              approved={18}
-              rejected={8}
+  const { employeeId } = useParams<{ employeeId: string }>();
+  const { user } = useAuth();
+  const { canView } = useModulePermissions("EMPLOYEE_MGMT");
+
+  const idToFetch = employeeId || user?.id;
+  const isOwnProfile = !employeeId || employeeId === user?.id;
+
+  if (!isOwnProfile && !canView) {
+    return (
+      <div className="h-[70dvh] flex flex-col items-center justify-center space-y-4">
+        <div className="p-4 bg-rose-50 rounded-full text-rose-500">
+          <svg
+            className="w-12 h-12"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 15v2m0 0v2m0-2h2m-2 0H10m11-3a9 9 0 11-18 0 9 9 0 0118 0z"
             />
-          </div>
-          <LeaveHistoryTimeline leaveHistory={MOCK_LEAVE_DATA} />
-        </main>
+          </svg>
+        </div>
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-slate-800">Access Denied</h2>
+          <p className="text-slate-500">
+            You don't have permission to view other employee profiles.
+          </p>
+        </div>
       </div>
+    );
+  }
+
+  const { data: profile, isLoading } = useQuery(
+    employeeService.getProfile,
+    [idToFetch!],
+    { enabled: !!idToFetch, showGlobalLoader: false },
+  );
+
+  if (isLoading) {
+    return (
+      <div className="h-[70dvh] flex items-center justify-center">
+        <div className="app-loader"></div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="h-[70dvh] flex items-center justify-center">
+        <p className="text-slate-500 font-medium">
+          Employee profile not found.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full mt-6 mx-auto grid grid-cols-1 lg:grid-cols-[300px_1fr] xl:grid-cols-[400px_1fr] gap-6 lg:gap-8">
+      <aside className="w-full lg:h-full">
+        <EmployeeProfileCard employee={profile.employee} />
+      </aside>
+      <main className="flex flex-col gap-6 lg:gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+          <LeaveBalances leaveBalances={profile.leaveBalances} />
+          <LeaveRequestStatusCounts
+            total={profile.requestStatusCounts.total}
+            pending={profile.requestStatusCounts.pending}
+            approved={profile.requestStatusCounts.approved}
+            rejected={profile.requestStatusCounts.rejected}
+          />
+        </div>
+        <LeaveHistoryTimeline leaveHistory={profile.leaveHistory} />
+      </main>
+    </div>
   );
 };
 

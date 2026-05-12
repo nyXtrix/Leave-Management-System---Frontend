@@ -2,24 +2,20 @@ import BaseRequestProvider from "../lib/api/BaseRequestProvider";
 import type { 
   EmployeeSearchResult, 
   EmployeeListResponse, 
-  RecentInviteResponse 
-} from "../types/employee.types";
+  RecentInviteResponse, 
+  EmployeeDetailResponse,
+  BulkUploadStatus,
+  EmployeeProfileResponse
+} from "@/types/employee.types";
+import type { PaginatedResult, QueryParams } from "@/types/utils";
 
-export interface PaginatedResult<T> {
-  items: T[];
-  totalCount: number;
-}
-
-export interface EmployeeFilters {
-  searchTerm?: string;
+export interface EmployeeFilters extends QueryParams {
   departmentId?: string;
   status?: number;
-  page?: number;
-  pageSize?: number;
 }
 
 export const employeeService = {
-  async getEmployees(filters: EmployeeFilters): Promise<PaginatedResult<EmployeeListResponse>> {
+  getEmployees: (filters: EmployeeFilters) => {
     const params: Record<string, string> = {
       page: String(filters.page || 1),
       pageSize: String(filters.pageSize || 12),
@@ -35,30 +31,40 @@ export const employeeService = {
     );
   },
 
-  async getRecentInvites(): Promise<RecentInviteResponse[]> {
-    return BaseRequestProvider.get<RecentInviteResponse[]>(
-      "/organization/employees/recent-invites"
+  getRecentInvites: () => BaseRequestProvider.get<RecentInviteResponse[]>(
+    "/organization/employees/recent-invites"
+  ),
+
+  getReportees: () => BaseRequestProvider.get<EmployeeListResponse[]>(
+    "/organization/employees/reportees"
+  ),
+
+  lookupEmployees: (search?: string) => BaseRequestProvider.get<EmployeeSearchResult[]>(
+    "/organization/employees/lookup",
+    search ? { q: search } : undefined
+  ),
+
+  getById: (id: string) => BaseRequestProvider.get<EmployeeDetailResponse>(`/organization/employees/${id}`),
+
+  delete: (id: string) => BaseRequestProvider.delete(`/organization/employees/${id}`),
+
+  uploadBulkUsers: (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return BaseRequestProvider.post<{ bulkInvitedId: string; message: string }>(
+      "/organization/employees/bulk-invite/upload",
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+        showSuccessToast: true,
+        showErrorToast: true,
+      }
     );
   },
 
-  async getReportees(): Promise<EmployeeListResponse[]> {
-    return BaseRequestProvider.get<EmployeeListResponse[]>(
-      "/organization/employees/reportees"
-    );
-  },
+  getBulkUploadStatus: (id: string) => BaseRequestProvider.get<BulkUploadStatus>(`/organization/employees/bulk-invite/status/${id}`),
 
-  async lookupEmployees(search?: string): Promise<EmployeeSearchResult[]> {
-    return BaseRequestProvider.get<EmployeeSearchResult[]>(
-      "/organization/employees/lookup",
-      search ? { q: search } : undefined
-    );
-  },
-
-  async getById(id: string): Promise<any> {
-    return BaseRequestProvider.get<any>(`/organization/employees/${id}`);
-  },
-
-  async delete(id: string): Promise<void> {
-    return BaseRequestProvider.delete(`/organization/employees/${id}`);
-  },
+  getActiveBulkUpload: () => BaseRequestProvider.get<BulkUploadStatus | null>("/organization/employees/bulk-invite/active"),
+  getProfile: (externalId: string) => BaseRequestProvider.get<EmployeeProfileResponse>(`/organization/employees/profile/${externalId}`),
 };

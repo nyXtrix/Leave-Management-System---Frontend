@@ -39,8 +39,13 @@ const DepartmentCreateOrEditModel: React.FC<DepartmentCreateOrEditModelProps> = 
       onClose={onClose}
       title={mode === "CREATE" ? 'Create Department' : 'Edit Department'}
       size="md"
+      primaryBtnText={mode === "EDIT" ? 'Save Changes' : 'Create Department'}
+      primaryBtnLoading={isLoading}
+      primaryBtnType="submit"
+      primaryBtnForm="department-form"
     >
       <Form
+        id="department-form"
         schema={departmentValidation}
         onSubmit={handleSubmit}
         defaultValues={defaultValues}
@@ -61,23 +66,6 @@ const DepartmentCreateOrEditModel: React.FC<DepartmentCreateOrEditModelProps> = 
             placeholder="Briefly describe the department's role..."
             rows={4}
           />
-        </div>
-
-        <div className="flex justify-end gap-3 pt-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            disabled={isLoading}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            isLoading={isLoading}
-          >
-            {mode === "EDIT" ? 'Save Changes' : 'Create Department'}
-          </Button>
         </div>
       </Form>
     </Modal>

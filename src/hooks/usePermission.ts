@@ -1,14 +1,16 @@
 import { useCallback } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/store';
 import type { PermissionModuleId, PermissionAction, PermissionScope } from '@/types/permission.types';
 import { canAccess, getScope } from '@/utils/permissions';
 
 export function usePermission() {
-  const { user } = useAuth();
-  
-  const permissions = user?.permissions;
+  const permissions = useSelector((state: RootState) => state.user.profile?.permissions);
 
-  const hasAccess = useCallback((module: PermissionModuleId, action: PermissionAction): boolean => {
+  const hasAccess = useCallback((
+    module: PermissionModuleId | PermissionModuleId[], 
+    action: PermissionAction | PermissionAction[]
+  ): boolean => {
     return canAccess(permissions, module, action);
   }, [permissions]);
 
@@ -20,5 +22,18 @@ export function usePermission() {
     hasAccess,
     getModuleScope,
     rawPermissions: permissions 
+  };
+}
+
+export function useModulePermissions(module: PermissionModuleId) {
+  const { hasAccess } = usePermission();
+
+  return {
+    canView: hasAccess(module, "VIEW"),
+    canCreate: hasAccess(module, "CREATE"),
+    canUpdate: hasAccess(module, "UPDATE"),
+    canDelete: hasAccess(module, "DELETE"),
+    canApprove: hasAccess(module, "APPROVE"),
+    canReject: hasAccess(module, "REJECT"),
   };
 }

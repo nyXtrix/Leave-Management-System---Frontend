@@ -7,6 +7,7 @@ export const RegisterValidationSchema = z
     AdminPassword: z
       .string()
       .min(6, "Security infrastructure requires at least 6 characters"),
+    ConfirmPassword: z.string().min(6, "Please confirm your password"),
     CompanyName: z.string().optional(),
     Subdomain: z.string().optional(),
     email: z
@@ -16,10 +17,12 @@ export const RegisterValidationSchema = z
   })
   .refine(
     (data) => {
+      if (data.AdminPassword !== data.ConfirmPassword) return false;
       return true;
     },
     {
-      message: "Configuration details are required for new workspace activation",
+      message: "Passwords do not match",
+      path: ["ConfirmPassword"],
     }
   );
 

@@ -1,4 +1,4 @@
-import type { AppPermissions } from './permission.types';
+import type { ApiPermissions, AppPermissions } from './permission.types';
 
 export const UserStatus = {
   Pending: 1,
@@ -55,11 +55,10 @@ export interface AuthMeResponse {
   tenantName: string;
   role: string;
   roleCode: string;
-  permissions: AppPermissions;
+  permissions: ApiPermissions;
   gender: number;
   status: number;
   department?: string;
   managerName?: string;
   updatedDate: string;
 }
-

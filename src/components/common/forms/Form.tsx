@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   useForm,
   FormProvider,
   type UseFormReturn,
   type FieldValues,
   type UseFormProps,
+  type DefaultValues,
   type SubmitHandler,
   type Resolver,
 } from "react-hook-form";
@@ -36,6 +37,12 @@ export const Form = <T extends FieldValues>({
   });
 
   const methods = (externalMethods || internalMethods) as UseFormReturn<T, object, T>;
+
+  useEffect(() => {
+    if (defaultValues) {
+      methods.reset(defaultValues as DefaultValues<T>);
+    }
+  }, [defaultValues, methods]);
 
   const handleSubmit: SubmitHandler<T> = (data) => onSubmit(data, methods as UseFormReturn<T>);
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Search, User, Check, ChevronDown, Loader2, X } from "lucide-react";
+import { Search, User, Check, ChevronDown, Loader2, X, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Popover,
@@ -11,56 +11,74 @@ import { employeeService } from "@/services/employee.service";
 import type { EmployeeSearchResult } from "@/types/employee.types";
 import { useDebounce } from "@/hooks/useDebounce";
 import IconButton from "@/components/ui/IconButton";
+import { useQuery } from "@/hooks/useQuery";
 
 export interface UserSelectProps {
   value?: string;
   onChange?: (value: string, label: string) => void;
   placeholder?: string;
+  label?: string;
+  required?: boolean;
   error?: string;
   className?: string;
   size?: "sm" | "md" | "lg";
   disabled?: boolean;
+  icon?: LucideIcon;
+  defaultLabel?: string;
 }
 
 const UserSelect = ({
   value,
   onChange,
   placeholder = "Type to search employee...",
+  label,
+  required,
   error,
   className,
   size = "md",
   disabled,
+  icon: Icon = User,
+  defaultLabel = "",
 }: UserSelectProps) => {
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const [results, setResults] = useState<EmployeeSearchResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [search, setSearch] = useState(defaultLabel);
   const [isTyping, setIsTyping] = useState(false);
-
   const debouncedSearch = useDebounce(search, 300);
 
-  const fetchUsers = useCallback(async (query: string) => {
-    const processedQuery = query.trim().toLowerCase();
-    if (processedQuery.length < 3) {
-      setResults([]);
-      return;
+  useEffect(() => {
+    if (value && defaultLabel && !search) {
+      setSearch(defaultLabel);
     }
-    setIsLoading(true);
-    try {
-      const response = await employeeService.getAll({ search: processedQuery });
-      setResults(response.data || []);
-    } catch (error) {
-      console.error("Failed to fetch employees", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  }, [value, defaultLabel]);
+
+  const queryFn = useCallback(
+    async (q: string) => {
+      const processedQuery = q.trim().toLowerCase();
+      if (processedQuery.length < 3 || !isTyping) return [];
+      try {
+        return await employeeService.lookupEmployees(processedQuery);
+      } catch (error) {
+        console.error("Failed to fetch employees", error);
+        return [];
+      }
+    },
+    [isTyping]
+  );
+
+  const { data, isLoading, setData } = useQuery(
+    queryFn,
+    [debouncedSearch],
+    { showGlobalLoader: false, ttl: 0 }
+  );
+
+  const results = data || [];
 
   useEffect(() => {
-    if (isTyping) {
-      void fetchUsers(debouncedSearch);
+    if (!value) {
+      setSearch("");
+      setData([]);
     }
-  }, [debouncedSearch, isTyping, fetchUsers]);
+  }, [value, setData]);
 
   const handleSelect = (user: EmployeeSearchResult) => {
     setSearch(user.label);
@@ -72,7 +90,7 @@ const UserSelect = ({
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
     setSearch("");
-    setResults([]);
+    setData([]);
     setIsTyping(false);
     setOpen(false);
     onChange?.("", "");
@@ -90,7 +108,9 @@ const UserSelect = ({
       <PopoverTrigger asChild>
         <div className={cn("relative group/user-select", className)}>
           <InputWithIcon
-            icon={User}
+            icon={Icon}
+            label={label}
+            required={required}
             placeholder={placeholder}
             disabled={disabled}
             size={size}
@@ -146,7 +166,12 @@ const UserSelect = ({
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <div className="max-h-[280px] overflow-y-auto no-scrollbar">
-          {results.length === 0 && !isLoading ? (
+          {isLoading ? (
+            <div className="py-12 flex flex-col items-center justify-center text-slate-500 animate-in fade-in duration-500">
+              <Loader2 className="h-8 w-8 text-primary-500 animate-spin mb-3" />
+              <p className="text-sm font-medium">Searching employees...</p>
+            </div>
+          ) : results.length === 0 ? (
             <div className="py-8 text-center text-slate-500 px-4">
               <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center mx-auto mb-3">
                 <Search className="h-6 w-6 text-slate-300" />

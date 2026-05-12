@@ -2,12 +2,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import userReducer from './slices/userSlice';
 import lookupReducer from './slices/lookupSlice';
 import appReducer from './slices/appSlice';
+import notificationReducer from './slices/notificationSlice';
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
     lookups: lookupReducer,
     app: appReducer,
+    notifications: notificationReducer,
   },
 });
 

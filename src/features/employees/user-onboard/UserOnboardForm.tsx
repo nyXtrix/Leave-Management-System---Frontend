@@ -19,6 +19,7 @@ const UserOnboardForm = () => {
 
   const methods = useForm<UserOnboardValidationType>({
     resolver: zodResolver(UserOnboardValidation),
+    mode: "onChange",
     defaultValues: {
       firstName: "",
       lastName: "",

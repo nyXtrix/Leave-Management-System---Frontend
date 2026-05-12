@@ -1,16 +1,18 @@
-import React, { useState } from "react";
 import { LayersPlus, Plus } from "lucide-react";
 import RoleCreationForm from "./RoleCreationForm";
 import Modal from "@/components/ui/Modal";
 import IconButton from "@/components/ui/IconButton";
 import { DataTable } from "@/components/tables/DataTable";
 import { roleService } from "@/services/role.service";
-import type { Role } from "@/types/organization.types";
+import type { Role, PaginatedRoles, CreateRoleRequest, UpdateRoleRequest } from "@/types/organization.types";
 import ViewPermissionModel from "./components/ViewPermissionModel";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { getRoleColumns } from "./columns";
 import { useQuery } from "@/hooks/useQuery";
+import { useState, useEffect } from "react";
+import { useLoader } from "@/contexts/LoaderContext";
+import type { QueryParams } from "@/types/utils";
 
 const RolesManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -23,14 +25,28 @@ const RolesManagement = () => {
     isDirty: false,
   });
 
+  const { showLoader, hideLoader } = useLoader();
   const PAGE_SIZE = 6;
 
-  const { data: rolesData, isLoading, refetch: rolesRefetch } = useQuery(
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const { data: rolesData, isLoading, refetch: rolesRefetch } = useQuery<PaginatedRoles, [QueryParams]>(
     roleService.getRoles,
     [{ page: currentPage, pageSize: PAGE_SIZE, searchTerm }],
+    { showGlobalLoader: false }
   );
 
-  const roles = rolesData?.items || [];
+  useEffect(() => {
+    if (isLoading && !rolesData) {
+      showLoader();
+    } else {
+      hideLoader();
+    }
+  }, [isLoading, rolesData, showLoader, hideLoader]);
+
+  const roles: Role[] = rolesData?.items || [];
   const totalCount = rolesData?.totalCount || 0;
 
   const {
@@ -109,11 +125,14 @@ const RolesManagement = () => {
     setSelectedRole(null);
   };
 
-  const handleRoleSubmit = async (payload: any) => {
+  const handleRoleSubmit = async (payload: CreateRoleRequest | UpdateRoleRequest) => {
     if (selectedRole) {
-      await roleService.updateRole(selectedRole.id, payload);
+      await roleService.updateRole(selectedRole.id, {
+        ...payload,
+        isActive: selectedRole.isActive,
+      } as UpdateRoleRequest);
     } else {
-      await roleService.createRole(payload);
+      await roleService.createRole(payload as CreateRoleRequest);
     }
     rolesRefetch();
     handleCloseCreate();
@@ -132,41 +151,33 @@ const RolesManagement = () => {
   });
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-280px)]">
-      <div className="flex-1 space-y-6 animate-reveal">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-slate-800">Roles</h2>
-            <p className="text-sm text-slate-500 mt-0.5 font-medium">
-              {roles.length} total roles
-            </p>
-          </div>
-          <IconButton
-            icon={Plus}
-            onClick={handleCreateNew}
-            className="rounded-xl shadow-glow-primary"
-          >
-            Create Role
-          </IconButton>
-        </div>
-
-        <div className="flex-1 min-h-0">
-          <DataTable
-            title="Roles"
-            subtitle="You can manage roles"
-            data={roles}
-            columns={columns}
-            searchable
-            totalResults={totalCount}
-            currentPage={currentPage}
-            onPageChange={setCurrentPage}
-            onSearchChange={setSearchTerm}
-            pageSize={PAGE_SIZE}
-            isLoading={isLoading}
-            emptyMessage="No roles yet. Create one to get started."
-            className="h-full"
-          />
-        </div>
+    <>
+      <div className="flex-1 flex flex-col min-h-0 space-y-6 animate-reveal">
+        <DataTable
+          title="Roles"
+          subtitle={`${totalCount} functional roles defined`}
+          data={roles}
+          columns={columns}
+          searchable={true}
+          onSearchChange={setSearchTerm}
+          totalResults={totalCount}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+          pageSize={PAGE_SIZE}
+          isLoading={isLoading}
+          onRefresh={rolesRefetch}
+          headerActions={
+            <IconButton
+              icon={Plus}
+              onClick={handleCreateNew}
+              className="font-semibold shadow-glow-primary"
+            >
+              Create Role
+            </IconButton>
+          }
+          emptyMessage="No roles yet. Create one to get started."
+          className="flex-1"
+        />
       </div>
 
       <Modal
@@ -212,7 +223,7 @@ const RolesManagement = () => {
         confirmText={confirmConfig.confirmText}
         isLoading={isConfirmLoading}
       />
-    </div>
+    </>
   );
 };
 

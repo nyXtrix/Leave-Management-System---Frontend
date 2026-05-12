@@ -1,10 +1,11 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { ChevronUp, ChevronDown, ChevronsUpDown, Search } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronsUpDown, Search, RefreshCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/Badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/Avatar";
 import InputWithIcon from "../common/inputs/InputWithIcon";
 import Pagination from "./Pagination";
+import IconButton from "../ui/IconButton";
 import { EmptyState, SkeletonRows } from "./DataTable.helpers";
 import type { DataTableProps, SortDirection } from "@/types/dataTable.types";
 
@@ -30,6 +31,8 @@ export function DataTable<T extends { id: string }>({
   onPageChange,
   onSearchChange,
   currentPage,
+  onRefresh,
+  headerActions,
 }: DataTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<SortDirection>(null);
@@ -97,8 +100,8 @@ export function DataTable<T extends { id: string }>({
       if (col?.sortFn) {
         return sortDir === "asc" ? col.sortFn(a, b) : col.sortFn(b, a);
       }
-      const av = (a as Record<string, unknown>)[sortKey];
-      const bv = (b as Record<string, unknown>)[sortKey];
+      const av = a[sortKey as keyof T];
+      const bv = b[sortKey as keyof T];
       if (typeof av === "number" && typeof bv === "number") {
         return sortDir === "asc" ? av - bv : bv - av;
       }
@@ -133,8 +136,7 @@ export function DataTable<T extends { id: string }>({
         className,
       )}
     >
-      {/* Table Header / Search Bar */}
-      {!hideHeader && (title || searchable) && (
+      {!hideHeader && (title || searchable || onRefresh || headerActions) && (
         <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-slate-100 bg-slate-50/40">
           {title && (
             <div>
@@ -146,21 +148,34 @@ export function DataTable<T extends { id: string }>({
               )}
             </div>
           )}
-          {searchable && (
-            <div className="ml-auto w-56">
-              <InputWithIcon
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                placeholder="Search…"
-                icon={Search}
-                className="h-8 text-xs"
+          <div className="flex items-center gap-3 ml-auto">
+            {searchable && (
+              <div className="w-56">
+                <InputWithIcon
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder="Search…"
+                  icon={Search}
+                  className="h-8 text-xs"
+                />
+              </div>
+            )}
+            {onRefresh && (
+              <IconButton
+                icon={RefreshCcw}
+                onClick={onRefresh}
+                disabled={isLoading}
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0 rounded-lg bg-white border-secondary-200/60 text-secondary-500 hover:text-primary-600 hover:bg-primary-50/30 hover:border-primary-200 transition-all shadow-none"
+                iconClassName={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`}
               />
-            </div>
-          )}
+            )}
+            {headerActions}
+          </div>
         </div>
       )}
 
-      {/* Table */}
       <div
         className={cn(
           "overflow-x-auto",
@@ -215,9 +230,7 @@ export function DataTable<T extends { id: string }>({
                   )}
                 >
                   {columns.map((col) => {
-                    const rawVal = (row as Record<string, unknown>)[
-                      String(col.key)
-                    ];
+                    const rawVal = row[col.key as keyof T];
                     return (
                       <td key={String(col.key)} className="px-6 py-3">
                         {col.render ? (
@@ -242,7 +255,6 @@ export function DataTable<T extends { id: string }>({
         </table>
       </div>
 
-      {/* Pagination */}
       {!isLoading && !hidePagination && (
         <Pagination
           page={page}

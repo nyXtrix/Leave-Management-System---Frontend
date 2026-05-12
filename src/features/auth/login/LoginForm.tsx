@@ -2,7 +2,7 @@ import React from "react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, ArrowRight } from "lucide-react";
+import { Mail, Lock, Building, Building2 } from "lucide-react";
 import { Button, cn } from "@/components/ui/Button";
 import MultiStepFlow from "@/components/common/multistep-flow/MultiStepFlow";
 import { Form, FormInput, FormPasswordInput } from "@/components/common/forms";
@@ -25,28 +25,32 @@ interface LoginFormProps {
   onEmailSubmit: (data: EmailFormData) => Promise<void>;
   onPasswordSubmit: (data: PasswordFormData) => Promise<void>;
   onBack: () => void;
+  onForgotPassword: () => void;
   isLoading: boolean;
   className?: string;
 }
 
-const EmailStep = ({ 
-  onSubmit, 
-  defaultEmail, 
-  isLoading 
-}: { 
-  onSubmit: (data: EmailFormData) => Promise<void>, 
-  defaultEmail: string,
-  isLoading: boolean
+const EmailStep = ({
+  onSubmit,
+  defaultEmail,
+  isLoading,
+}: {
+  onSubmit: (data: EmailFormData) => Promise<void>;
+  defaultEmail: string;
+  isLoading: boolean;
 }) => {
   const methods = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),
     defaultValues: { email: defaultEmail },
   });
 
-  const { formState: { isSubmitting } } = methods;
+  const {
+    formState: { isSubmitting },
+  } = methods;
 
   return (
     <Form
+      id="login-email-form"
       schema={emailSchema}
       methods={methods}
       onSubmit={onSubmit}
@@ -62,14 +66,17 @@ const EmailStep = ({
           size="md"
         />
 
-        <Button
-          type="submit"
-          disabled={isLoading || isSubmitting}
-          className="w-full group"
-        >
-          Continue
-          <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
-        </Button>
+        <div className="p-4 rounded-xl bg-primary-50/50 border border-primary-100/20">
+          <div className="flex gap-3">
+            <div className="h-5 w-5 rounded-md bg-white flex items-center justify-center shadow-sm border border-primary-100 flex-shrink-0">
+              <Lock className="h-3 w-3 text-primary-500" />
+            </div>
+            <p className="text-xs text-primary-900/60 leading-relaxed">
+              We use your email to identify your organization and provide a
+              personalized login experience.
+            </p>
+          </div>
+        </div>
       </div>
     </Form>
   );
@@ -78,65 +85,69 @@ const EmailStep = ({
 const PasswordStep = ({
   onSubmit,
   email,
-  tenantInfo,
-  isLoading
+  companyName,
+  isLoading,
+  onForgotPassword,
+  onBack,
 }: {
-  onSubmit: (data: PasswordFormData) => Promise<void>,
-  email: string,
-  tenantInfo: { name: string } | null,
-  isLoading: boolean
+  onSubmit: (data: PasswordFormData) => Promise<void>;
+  email: string;
+  companyName: string | null;
+  isLoading: boolean;
+  onForgotPassword: () => void;
+  onBack: () => void;
 }) => {
   const methods = useForm<PasswordFormData>({
     resolver: zodResolver(passwordSchema),
   });
 
-  const { formState: { isSubmitting } } = methods;
+  const {
+    formState: { isSubmitting },
+  } = methods;
 
   return (
     <Form
+      id="login-password-form"
       schema={passwordSchema}
       methods={methods}
       onSubmit={onSubmit}
       className="space-y-6"
     >
-      <div className="space-y-6">
-        <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100 mb-2">
-          <div className="h-10 w-10 rounded-xl bg-primary-50 flex items-center justify-center">
-            <Mail className="h-5 w-5 text-primary-500" />
+      <div className="space-y-2">
+        <div className="flex items-center gap-3 rounded-xl border border-secondary-200 bg-slate-50 px-4 py-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100">
+            <Building2 className="h-4 w-4 text-primary-600" />
           </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-bold text-slate-900 truncate">
-              {tenantInfo?.name || "LMS Network"}
+
+          <div className="min-w-0">
+            <p className="text-xs text-slate-500">Company</p>
+            <h3 className="truncate text-sm font-semibold text-slate-900">
+              {companyName || "Flow OFF"}
             </h3>
-            <p className="text-xs text-slate-400 truncate">{email}</p>
           </div>
         </div>
+        <FormInput
+          name="email"
+          label="Email"
+          defaultValue={email}
+          required
+          disabled
+        />
 
-        <div className="relative">
-          <div className="absolute right-1 top-0 z-10">
-            <button
-              type="button"
-              className="text-[0.625rem] font-black text-primary-500 hover:text-primary-600 uppercase tracking-widest"
-            >
-              Forgot?
-            </button>
-          </div>
-          <FormPasswordInput
-            name="password"
-            label="Security Credentials"
-            placeholder="••••••••••••"
-            required
-            size="md"
-          />
-        </div>
-
+        <FormPasswordInput
+          name="password"
+          label="Password"
+          placeholder="••••••••••••"
+          required
+          size="md"
+        />
         <Button
-          type="submit"
-          disabled={isLoading || isSubmitting}
-          className="w-full group"
+          type="button"
+          variant="link"
+          onClick={onForgotPassword}
+          className="text-sm ml-2 p-0 h-max font-medium text-primary-500 hover:text-primary-600 cursor-pointer"
         >
-          Authenticate
-          <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+          Forgot Password?
         </Button>
       </div>
     </Form>
@@ -150,6 +161,7 @@ const LoginForm = ({
   onEmailSubmit,
   onPasswordSubmit,
   onBack,
+  onForgotPassword,
   isLoading,
   className,
 }: LoginFormProps) => {
@@ -157,21 +169,23 @@ const LoginForm = ({
     {
       title: "Welcome Back",
       content: (
-        <EmailStep 
-          onSubmit={onEmailSubmit} 
-          defaultEmail={email} 
-          isLoading={isLoading} 
+        <EmailStep
+          onSubmit={onEmailSubmit}
+          defaultEmail={email}
+          isLoading={isLoading}
         />
       ),
     },
     {
       title: "Verify Identity",
       content: (
-        <PasswordStep 
-          onSubmit={onPasswordSubmit} 
-          email={email} 
-          tenantInfo={tenantInfo} 
-          isLoading={isLoading} 
+        <PasswordStep
+          email={email}
+          companyName={tenantInfo?.name || null}
+          onSubmit={onPasswordSubmit}
+          isLoading={isLoading}
+          onForgotPassword={onForgotPassword}
+          onBack={onBack}
         />
       ),
     },

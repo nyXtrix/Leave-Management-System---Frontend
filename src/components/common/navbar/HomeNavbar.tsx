@@ -20,7 +20,7 @@ import IconButton from "@/components/ui/IconButton";
 
 const HomeNavbar = () => {
   return (
-    <Navbar className="py-2 h-20">
+    <Navbar className="py-2 h-20 bg-white">
       <div className="hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
         {HOME_NAV_LINKS.map((menu) => (
           <DropdownMenu key={menu.label}>

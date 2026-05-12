@@ -88,6 +88,10 @@ const lookupSlice = createSlice({
   initialState,
   reducers: {
     clearLookups: () => initialState,
+    invalidateLookup: (state, action: PayloadAction<keyof LookupState>) => {
+      state[action.payload].lastUpdated = null;
+      state[action.payload].status = "idle";
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -148,5 +152,5 @@ const lookupSlice = createSlice({
   },
 });
 
-export const { clearLookups } = lookupSlice.actions;
+export const { clearLookups, invalidateLookup } = lookupSlice.actions;
 export default lookupSlice.reducer;

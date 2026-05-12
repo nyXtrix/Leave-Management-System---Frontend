@@ -59,10 +59,22 @@ async function handleResponse<T>(
 
   if (!res.ok) {
     let message = 'An error occurred during communication.';
+    let errorCode = undefined;
     try {
       const body = await res.json();
       message = body.message ?? body.title ?? message;
+      errorCode = body.errorCode;
     } catch {}
+
+    if (res.status === 500 || errorCode === 'INTERNAL_SERVER_ERROR') {
+      if (document.cookie) {
+        if (!sessionStorage.getItem('has_auto_reloaded')) {
+          sessionStorage.setItem('has_auto_reloaded', 'true');
+          window.location.reload();
+          return new Promise(() => {}) as Promise<T>;
+        }
+      }
+    }
 
     if (options?.showErrorToast || options?.errorMessage) {
       Toast({ type: 'error', message: options?.errorMessage ?? message });
@@ -71,6 +83,8 @@ async function handleResponse<T>(
     const err: ApiError = { message, status: res.status };
     throw err;
   }
+
+  sessionStorage.removeItem('has_auto_reloaded');
 
   if (options?.showSuccessToast || options?.successMessage) {
     Toast({ type: 'success', message: options?.successMessage ?? 'Success' });
@@ -85,6 +99,10 @@ function buildHeaders(extra?: Record<string, string>): Record<string, string> {
     'Content-Type': 'application/json',
     ...extra,
   };
+
+  if (extra?.['Content-Type'] === 'multipart/form-data') {
+    delete headers['Content-Type'];
+  }
 
   const tenant = getTenant();
   if (tenant) {
@@ -107,34 +125,37 @@ const BaseRequestProvider = {
     return handleResponse<T>(res, options, () => this.get<T>(endpoint, params, options));
   },
 
-  async post<T>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T> {
+  async post<T, D = object | FormData>(endpoint: string, data?: D, options?: RequestOptions): Promise<T> {
+    const isFormData = data instanceof FormData;
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: buildHeaders(options?.headers),
-      body: data !== undefined ? JSON.stringify(data) : undefined,
+      body: isFormData ? data : (data !== undefined ? JSON.stringify(data) : undefined),
       credentials: 'include',
     });
-    return handleResponse<T>(res, options, () => this.post<T>(endpoint, data, options));
+    return handleResponse<T>(res, options, () => this.post<T, D>(endpoint, data, options));
   },
 
-  async put<T>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T> {
+  async put<T, D = object | FormData>(endpoint: string, data?: D, options?: RequestOptions): Promise<T> {
+    const isFormData = data instanceof FormData;
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'PUT',
       headers: buildHeaders(options?.headers),
-      body: data !== undefined ? JSON.stringify(data) : undefined,
+      body: isFormData ? data : (data !== undefined ? JSON.stringify(data) : undefined),
       credentials: 'include',
     });
-    return handleResponse<T>(res, options, () => this.put<T>(endpoint, data, options));
+    return handleResponse<T>(res, options, () => this.put<T, D>(endpoint, data, options));
   },
 
-  async patch<T>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T> {
+  async patch<T, D = object | FormData>(endpoint: string, data?: D, options?: RequestOptions): Promise<T> {
+    const isFormData = data instanceof FormData;
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'PATCH',
       headers: buildHeaders(options?.headers),
-      body: data !== undefined ? JSON.stringify(data) : undefined,
+      body: isFormData ? data : (data !== undefined ? JSON.stringify(data) : undefined),
       credentials: 'include',
     });
-    return handleResponse<T>(res, options, () => this.patch<T>(endpoint, data, options));
+    return handleResponse<T>(res, options, () => this.patch<T, D>(endpoint, data, options));
   },
 
   async delete<T>(endpoint: string, options?: RequestOptions): Promise<T> {

@@ -38,6 +38,7 @@ interface ModalProps extends VariantProps<typeof modalVariants> {
   overlayClassName?: string;
   headerClassName?: string;
   onConfirm?: () => void;
+  onSecondaryAction?: () => void;
   primaryBtnText?: string;
   secondaryBtnText?: string;
   primaryBtnClassName?: string;
@@ -47,6 +48,7 @@ interface ModalProps extends VariantProps<typeof modalVariants> {
   primaryBtnForm?: string;
   primaryBtnDisabled?: boolean;
   primaryBtnLoading?: boolean;
+  position?: "center" | "right" | "left" | "top" | "bottom";
   hideFooter?: boolean;
 }
 
@@ -62,6 +64,7 @@ const Modal: React.FC<ModalProps> = ({
   overlayClassName,
   headerClassName,
   onConfirm,
+  onSecondaryAction,
   primaryBtnText,
   secondaryBtnText,
   primaryBtnIcon,
@@ -72,6 +75,7 @@ const Modal: React.FC<ModalProps> = ({
   primaryBtnDisabled,
   primaryBtnLoading,
   hideFooter = false,
+  position = "center",
 }) => {
   const [mounted, setMounted] = useState(false);
 
@@ -93,15 +97,30 @@ const Modal: React.FC<ModalProps> = ({
     }
   };
 
+  const positionClasses = {
+    center: "items-center justify-center p-4",
+    right: "items-center justify-end p-4 h-full",
+    left: "items-center justify-start p-4 h-full",
+    top: "items-start justify-center p-4",
+    bottom: "items-end justify-center p-4",
+  };
+
   const modalContent = (
     <div
       className={cn(
-        "fixed inset-0 z-50 bg-gray-500/30 backdrop-blur-md transition-all duration-500 flex items-center justify-center p-4",
+        "fixed inset-0 z-50 bg-gray-500/30 backdrop-blur-md transition-all duration-500 flex",
+        positionClasses[position],
         overlayClassName
       )}
       onClick={handleBackdropClick}
     >
-      <div className={cn(modalVariants({ size }), className)}>
+      <div 
+        className={cn(
+          modalVariants({ size }), 
+          position === "right" || position === "left" ? "h-[calc(100vh-2rem)]" : "",
+          className
+        )}
+      >
         <div className={cn("flex items-start justify-between p-8 pb-4 border-b", headerClassName)}>
           <div className="flex flex-col">
             <h2 className="text-2xl font-black tracking-tight text-slate-900">
@@ -131,7 +150,7 @@ const Modal: React.FC<ModalProps> = ({
         <div className="flex justify-end p-4 border-t gap-4">
             <IconButton
               variant="outline"
-              onClick={onClose}
+              onClick={onSecondaryAction || onClose}
               className={secondaryBtnClassName}
             >
               {secondaryBtnText || "Cancel"}

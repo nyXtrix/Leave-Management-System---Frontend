@@ -1,52 +1,32 @@
 import React from "react";
 import { useFormContext, Controller } from "react-hook-form";
-import UserSelect from "@/components/common/inputs/UserSelect";
+import UserSelect, { type UserSelectProps } from "@/components/common/inputs/UserSelect";
 
-interface FormUserSelectProps {
+interface FormUserSelectProps extends UserSelectProps {
   name: string;
-  label?: string;
-  placeholder?: string;
-  required?: boolean;
-  size?: "sm" | "md" | "lg";
-  className?: string;
-  disabled?: boolean;
+  defaultLabel?: string;
 }
 
 export const FormUserSelect = ({
   name,
-  label,
-  placeholder,
-  required,
-  size = "md",
-  className,
-  disabled,
+  defaultLabel,
+  ...props
 }: FormUserSelectProps) => {
   const { control } = useFormContext();
 
   return (
-    <div className="space-y-2">
-      {label && (
-        <label className="block text-sm font-bold text-slate-700 ml-1">
-          {label}
-          {required && <span className="ml-1 text-red-500 font-bold">*</span>}
-        </label>
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState: { error } }) => (
+        <UserSelect
+          {...props}
+          value={field.value ?? ""}
+          defaultLabel={defaultLabel}
+          onChange={(val) => field.onChange(val)}
+          error={error?.message}
+        />
       )}
-
-      <Controller
-        name={name}
-        control={control}
-        render={({ field, fieldState: { error } }) => (
-          <UserSelect
-            value={field.value}
-            onChange={(val) => field.onChange(val)}
-            placeholder={placeholder}
-            error={error?.message}
-            size={size}
-            className={className}
-            disabled={disabled}
-          />
-        )}
-      />
-    </div>
+    />
   );
 };

@@ -5,7 +5,6 @@ import {
   CalendarRange,
   Users,
   ClipboardCheck,
-  Settings,
   ShieldCheck,
   Building2,
   Sparkles,
@@ -23,6 +22,7 @@ import {
   Rocket,
   CalendarDays,
   User,
+  LensConcave,
 } from "lucide-react";
 
 export const ROUTES = {
@@ -70,7 +70,6 @@ export const HOME_NAV_LINKS: HomeNavSection[] = [
     label: "Resources",
     items: [
       { label: "Documentation", href: "#docs", icon: FileText },
-      { label: "API Reference", href: "#api", icon: Code2 },
       { label: "Blog", href: "#blog", icon: Rss },
       { label: "Help Center", href: "#help", icon: HelpCircle },
     ],
@@ -80,7 +79,6 @@ export const HOME_NAV_LINKS: HomeNavSection[] = [
     items: [
       { label: "About Us", href: "#about", icon: Info },
       { label: "Contact", href: "/contact", icon: MessageSquare },
-      { label: "Careers", href: "#careers", icon: Briefcase },
     ],
   },
 ];
@@ -151,7 +149,7 @@ export const getSidebarRoutes = (user: UserProfile | null) => {
     managementItems.push({
       label: "Leave Policy",
       to: `${primaryRoute}/policy`,
-      icon: ShieldCheck,
+      icon: LensConcave,
     });
   }
   if (permissions["LEAVE_MGMT"]?.actions?.includes("VIEW")) {
@@ -201,3 +199,18 @@ export const getSidebarRoutes = (user: UserProfile | null) => {
 
   return sections;
 };
+
+export const EMPLOYEE_STATUS_OPTIONS = [
+  { label: "All Statuses", value: "" },
+  { label: "Active", value: 2 },
+  { label: "Pending", value: 1 },
+  { label: "Inactive", value: 3 },
+  { label: "Terminated", value: 4 },
+];
+
+export const CALENDER_EVENT_FILTER = [
+  { label: "All Events", value: "ALL" },
+  { label: "Team Leaves", value: "TEAM" },
+  { label: "My Reportees", value: "REPORTEES" },
+  { label: "Organization Holidays", value: "HOLIDAY" },
+]

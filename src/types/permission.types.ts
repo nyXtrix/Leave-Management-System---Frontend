@@ -20,10 +20,10 @@ export type PermissionModuleId =
   | "CALENDAR";
 
 export const PermissionScope = {
-  ALL: 1,
-  DEPARTMENT: 2,
-  TEAM: 3,
-  SELF: 4,
+  ALL: "ALL",
+  DEPARTMENT: "DEPARTMENT",
+  TEAM: "TEAM",
+  SELF: "SELF",
 } as const;
 
 export type PermissionScope =
@@ -42,6 +42,13 @@ export type AppPermissions = {
     scope: PermissionScope;
   };
 };
+
+export interface ApiPermissions {
+  [moduleId: string]: {
+    actions: (string | number)[];
+    scope: PermissionScope;
+  };
+}
 
 export type RolePermissions = Partial<
   Record<PermissionModuleId, PermissionAction[]>

@@ -56,6 +56,17 @@ export const useInitializeApp = () => {
     }
   }, [status, initialize]);
 
+  const { departments, roles, genders, leaveTypes } = useSelector((state: RootState) => state.lookups);
+  
+  useEffect(() => {
+    if (status !== "READY") return;
+    
+    if (departments.status === "idle") dispatch(fetchDepartments());
+    if (roles.status === "idle") dispatch(fetchRoles());
+    if (genders.status === "idle") dispatch(fetchGenders());
+    if (leaveTypes.status === "idle") dispatch(fetchLeaveTypes());
+  }, [status, dispatch, departments.status, roles.status, genders.status, leaveTypes.status]);
+
   return {
     status,
     retry: () => dispatch(setAppStatus("INITIALIZING")),

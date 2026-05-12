@@ -30,6 +30,7 @@ interface SelectInputProps {
   className?: string;
   id?: string;
   size?: "xs" | "sm" | "md" | "lg" | "xl";
+  disabled?: boolean;
 }
 
 const SelectInput = React.forwardRef<HTMLButtonElement, SelectInputProps>(
@@ -49,6 +50,7 @@ const SelectInput = React.forwardRef<HTMLButtonElement, SelectInputProps>(
       onChange,
       id,
       size = "md",
+      disabled,
     },
     ref
   ) => {
@@ -95,6 +97,7 @@ const SelectInput = React.forwardRef<HTMLButtonElement, SelectInputProps>(
               type="button"
               noScale
               variant="ghost"
+              disabled={disabled}
               icon={Icon}
               iconPosition="left"
               iconClassName={cn(

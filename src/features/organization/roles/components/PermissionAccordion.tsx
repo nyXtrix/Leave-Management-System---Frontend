@@ -7,12 +7,16 @@ import { Button } from "@/components/ui/Button";
 interface Props {
   modules: any[];
   permissions: string[];
-  scopes: Record<string, PermissionScope>;
+  scopes: Record<string, PermissionScope | "">;
   onPermissionChange: (v: string[]) => void;
-  onScopeChange: (moduleId: string, scope: PermissionScope) => void;
+  onScopeChange: (moduleId: string, scope: PermissionScope | "") => void;
 }
 
 const ACTIONS = ["VIEW", "CREATE", "UPDATE", "DELETE"];
+const SCOPES = [
+  { label: "All", value: PermissionScope.ALL },
+  { label: "Department", value: PermissionScope.DEPARTMENT },
+];
 
 export default function PermissionMatrix({
   modules,
@@ -66,7 +70,7 @@ export default function PermissionMatrix({
       </div>
 
       {modules.map((m) => {
-        const scope = scopes[m.id] ?? "";
+        const scope = scopes[m.id] || PermissionScope.ALL;
         const allEnabled = ACTIONS.every((a) =>
           permissions.includes(`${m.id}:${a}`),
         );
@@ -83,12 +87,9 @@ export default function PermissionMatrix({
             <div className="col-span-3">
               <SelectInput
                 value={scope}
-                options={[
-                  { label: "None", value: "" },
-                  { label: "Department", value: PermissionScope.DEPARTMENT },
-                  { label: "All", value: PermissionScope.ALL },
-                ]}
-                onChange={(v) => onScopeChange(m.id, v as PermissionScope)}
+                defaultValue={SCOPES[0].value}
+                options={SCOPES}
+                onChange={(v) => onScopeChange(m.id, v as PermissionScope | "")}
                 size="xs"
                 className="rounded-lg max-w-40"
               />

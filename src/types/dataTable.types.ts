@@ -2,13 +2,12 @@ import React from "react";
 
 export type SortDirection = "asc" | "desc" | null;
 
-export interface Column<T> {
+export interface Column<T, V = T[keyof T]> {
   key: keyof T | string;
   header: string;
   sortable?: boolean;
   width?: string;
-  render?: (value: unknown, row: T) => React.ReactNode;
-  /** Custom sort comparator. Receives two rows, return -1 / 0 / 1 */
+  render?: (value: V, row: T) => React.ReactNode;
   sortFn?: (a: T, b: T) => number;
 }
 
@@ -34,4 +33,6 @@ export interface DataTableProps<T extends { id: string }> {
   onPageChange?: (page: number) => void;
   onSearchChange?: (searchTerm: string) => void;
   currentPage?: number;
+  onRefresh?: () => void;
+  headerActions?: React.ReactNode;
 }

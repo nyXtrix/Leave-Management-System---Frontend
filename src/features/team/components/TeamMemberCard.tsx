@@ -12,9 +12,13 @@ import {
   CalendarDays,
   Minus,
   Check,
+  Sun,
+  Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isWeekend } from "date-fns";
 
+// TeamMember interface matching backend DTO
 export interface TeamMember {
   id: string;
   firstName: string;
@@ -22,7 +26,7 @@ export interface TeamMember {
   email: string;
   departmentName: string;
   roleName: string;
-  status: "Active" | "Pending" | "Inactive";
+  status: string;
   joinedDate: string;
   onLeaveToday: boolean;
   leaveType?: string;
@@ -37,10 +41,19 @@ const LEAVE_ICONS: Record<string, React.ElementType> = {
 
 interface TeamMemberCardProps {
   member: TeamMember;
+  isHoliday?: boolean;
+  isWeekOff?: boolean;
+  holidayName?: string;
   onViewClick: (id: string) => void;
 }   
 
-const TeamMemberCard = ({ member, onViewClick }: TeamMemberCardProps) => {
+const TeamMemberCard = ({ 
+  member, 
+  isHoliday, 
+  isWeekOff, 
+  holidayName,
+  onViewClick 
+}: TeamMemberCardProps) => {
   const LeaveIcon = member.leaveType
     ? (LEAVE_ICONS[member.leaveType] ?? LEAVE_ICONS["default"])
     : LEAVE_ICONS["default"];
@@ -62,11 +75,19 @@ const TeamMemberCard = ({ member, onViewClick }: TeamMemberCardProps) => {
             </div>
             <span
               className={cn(
-                "absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-white flex items-center justify-center",
-                member.onLeaveToday ? "bg-amber-400" : "bg-emerald-500"
+                "absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-white flex items-center justify-center transition-colors duration-300",
+                isHoliday || isWeekOff
+                  ? "bg-slate-400" 
+                  : member.onLeaveToday 
+                  ? "bg-amber-400" 
+                  : "bg-emerald-500"
               )}
             >
-              {member.onLeaveToday ? (
+              {isHoliday ? (
+                <Calendar className="h-2 w-2 text-white" strokeWidth={3} />
+              ) : isWeekOff ? (
+                <Sun className="h-2 w-2 text-white" strokeWidth={3} />
+              ) : member.onLeaveToday ? (
                 <Minus className="h-2.5 w-2.5 text-white" strokeWidth={3} />
               ) : (
                 <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
@@ -100,18 +121,34 @@ const TeamMemberCard = ({ member, onViewClick }: TeamMemberCardProps) => {
       {/* Today's availability */}
       <div
         className={cn(
-          "flex items-center gap-2 px-3 py-2 rounded-lg mb-3 border",
-          member.onLeaveToday
+          "flex items-center gap-2 px-3 py-2 rounded-lg mb-3 border transition-colors duration-300",
+          isHoliday || isWeekOff
+            ? "bg-slate-50 border-slate-200"
+            : member.onLeaveToday
             ? "bg-amber-50 border-amber-200"
             : "bg-emerald-50 border-emerald-100"
         )}
       >
-        {member.onLeaveToday ? (
+        {isHoliday ? (
+          <>
+            <Calendar className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+            <span className="text-[11px] font-bold text-slate-700">
+              {holidayName || "Public Holiday"}
+            </span>
+          </>
+        ) : isWeekOff ? (
+          <>
+            <Sun className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+            <span className="text-[11px] font-bold text-slate-700">
+              Week Off
+            </span>
+          </>
+        ) : member.onLeaveToday ? (
           <>
             <LeaveIcon className="h-3.5 w-3.5 text-amber-500 shrink-0" />
             <div>
               <span className="text-[11px] font-bold text-amber-700">
-                {member.leaveType ?? "On Leave"}
+                {member.leaveType ?? "On Leave"} 
               </span>
               {member.leaveReturnDate && (
                 <span className="text-[10px] text-amber-500 ml-1">
