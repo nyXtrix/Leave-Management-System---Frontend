@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { authService } from "@/services/auth.service";
 import LoginForm from "./LoginForm";
 import { toast } from "sonner";
-import { UserStatus } from "@/types/auth.types";
+import { UserLoginStatus } from "@/types/auth.types";
 import LoginImage from "@/assets/undraw/undraw_cabin_7fei.svg";
 import AuthFormLayout from "../layout/AuthFormLayout";
 import Modal from "@/components/ui/Modal";
@@ -32,12 +32,12 @@ const LoginManagement = () => {
         return;
       }
 
-      if (response.status === UserStatus.Pending) {
+      if (response.status === UserLoginStatus.SetPasswordRequired) {
         toast.error("Please set your password first by checking your invite email.");
         return;
       }
 
-      if (response.status === UserStatus.InActive || response.status === UserStatus.Terminated) {
+      if (response.status === UserLoginStatus.Inactive) {
         toast.error("Your account is inactive. Please contact your administrator.");
         return;
       }

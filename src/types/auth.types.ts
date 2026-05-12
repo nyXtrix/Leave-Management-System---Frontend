@@ -9,6 +9,15 @@ export const UserStatus = {
 
 export type UserStatus = typeof UserStatus[keyof typeof UserStatus];
 
+export const UserLoginStatus = {
+  Active: 1,
+  Inactive: 2,
+  SetPasswordRequired: 3,
+  NotFound: 4
+} as const;
+
+export type UserLoginStatus = typeof UserLoginStatus[keyof typeof UserLoginStatus];
+
 export interface UserProfile {
   id: string;
   email: string;
