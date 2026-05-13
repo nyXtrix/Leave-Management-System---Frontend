@@ -66,5 +66,11 @@ export const employeeService = {
   getBulkUploadStatus: (id: string) => BaseRequestProvider.get<BulkUploadStatus>(`/organization/employees/bulk-invite/status/${id}`),
 
   getActiveBulkUpload: () => BaseRequestProvider.get<BulkUploadStatus | null>("/organization/employees/bulk-invite/active"),
+  
   getProfile: (externalId: string) => BaseRequestProvider.get<EmployeeProfileResponse>(`/organization/employees/profile/${externalId}`),
+
+  updateProfile: (externalId: string, data: any) => BaseRequestProvider.put(`/organization/employees/profile/${externalId}`, data, {
+    showSuccessToast: true,
+    successMessage: "Profile updated successfully"
+  }),
 };

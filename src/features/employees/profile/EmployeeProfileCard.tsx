@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/DropdownMenu";
 import { UserStatus } from "@/types/auth.types";
 import EditProfileModal from "./components/EditProfileModal";
+import { type EditProfileFormValues } from "@/validations/users/profile.schema";
 import { useModulePermissions } from "@/hooks/usePermission";
 
 export interface ProfileBasicInfo {
@@ -35,6 +36,7 @@ export interface ProfileBasicInfo {
   status: number;
   role: string;
   roleId: string;
+  roleCode: string;
   department?: string | null;
   departmentId?: string | null;
   managerName?: string | null;
@@ -43,9 +45,10 @@ export interface ProfileBasicInfo {
 
 interface EmployeeProfileCardProps {
   employee: ProfileBasicInfo;
+  onUpdate?: (values: EditProfileFormValues) => void;
 }
 
-const EmployeeProfileCard = ({ employee }: EmployeeProfileCardProps) => {
+const EmployeeProfileCard = ({ employee, onUpdate }: EmployeeProfileCardProps) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isResendModalOpen, setIsResendModalOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -54,6 +57,7 @@ const EmployeeProfileCard = ({ employee }: EmployeeProfileCardProps) => {
 
   const isPending = employee.status === UserStatus.Pending;
   const isInactive = employee.status === UserStatus.InActive;
+  const isSuperAdmin = employee.roleCode === "SUPER_ADMIN";
 
   const handleResendInvitation = () => {
     setIsActionLoading(true);
@@ -178,6 +182,7 @@ const EmployeeProfileCard = ({ employee }: EmployeeProfileCardProps) => {
         isOpen={isEditModalOpen} 
         onClose={() => setIsEditModalOpen(false)} 
         employee={employee} 
+        onSubmit={onUpdate}
       />
 
       <Modal
@@ -214,39 +219,41 @@ const EmployeeProfileCard = ({ employee }: EmployeeProfileCardProps) => {
       </Modal>
 
       <div className="flex-1">
-        <div className="space-y-2">
-          <h3 className=" text-secondary-400 text-base mt-3">Work Placement</h3>
+        {!isSuperAdmin && (
+          <div className="space-y-2">
+            <h3 className=" text-secondary-400 text-base mt-3">Work Placement</h3>
 
-          <div className="space-y-3">
-            <div className="flex items-start gap-4 p-4 rounded-2xl bg-secondary-200/30">
-              <div className="p-3 bg-white rounded-xl text-secondary-500 shadow-sm">
-                <Building2 className="w-5 h-5" />
+            <div className="space-y-3">
+              <div className="flex items-start gap-4 p-4 rounded-2xl bg-secondary-200/30">
+                <div className="p-3 bg-white rounded-xl text-secondary-500 shadow-sm">
+                  <Building2 className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-secondary-400">
+                    Department
+                  </p>
+                  <p className="text-sm font-bold text-secondary-600 truncate">
+                    {employee.department}
+                  </p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-secondary-400">
-                  Department
-                </p>
-                <p className="text-sm font-bold text-secondary-600 truncate">
-                  {employee.department}
-                </p>
-              </div>
-            </div>
 
-            <div className="flex items-start gap-4 p-4 rounded-2xl bg-secondary-200/30">
-              <div className="p-3 bg-white rounded-xl text-secondary-500 shadow-sm group-hover:text-primary-600">
-                <UserCheck className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-secondary-400">
-                  Direct Manager
-                </p>
-                <p className="text-sm font-bold text-secondary-600 truncate">
-                  {employee.managerName}
-                </p>
+              <div className="flex items-start gap-4 p-4 rounded-2xl bg-secondary-200/30">
+                <div className="p-3 bg-white rounded-xl text-secondary-500 shadow-sm group-hover:text-primary-600">
+                  <UserCheck className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-secondary-400">
+                    Direct Manager
+                  </p>
+                  <p className="text-sm font-bold text-secondary-600 truncate">
+                    {employee.managerName}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="space-y-2">
           <h3 className="text-base font-bold text-secondary-400 pt-4">

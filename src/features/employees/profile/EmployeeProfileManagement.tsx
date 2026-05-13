@@ -5,9 +5,10 @@ import EmployeeProfileCard from "./EmployeeProfileCard";
 import LeaveBalances from "./leave-stats/leave-balance/LeaveBalances";
 import LeaveHistoryTimeline from "./leave-stats/LeaveHistoryTimeline";
 import LeaveRequestStatusCounts from "./leave-stats/LeaveRequestStatusCounts";
-
+import { type EditProfileFormValues } from "@/validations/users/profile.schema";
 import { useAuth } from "@/contexts/AuthContext";
 import { useModulePermissions } from "@/hooks/usePermission";
+import { Info } from "lucide-react";
 
 const EmployeeProfileManagement = () => {
   const { employeeId } = useParams<{ employeeId: string }>();
@@ -45,7 +46,7 @@ const EmployeeProfileManagement = () => {
     );
   }
 
-  const { data: profile, isLoading } = useQuery(
+  const { data: profile, isLoading, refetch } = useQuery(
     employeeService.getProfile,
     [idToFetch!],
     { enabled: !!idToFetch, showGlobalLoader: false },
@@ -69,22 +70,52 @@ const EmployeeProfileManagement = () => {
     );
   }
 
+  const handleUpdateProfile = async (values: EditProfileFormValues) => {
+    if (!profile?.employee.id) return;
+    await employeeService.updateProfile(profile.employee.id, {
+      ...values,
+      gender: Number(values.gender),
+    });
+    refetch();
+  };
+
+  const isSuperAdmin = profile.employee.roleCode === "SUPER_ADMIN";
+
   return (
     <div className="w-full mt-6 mx-auto grid grid-cols-1 lg:grid-cols-[300px_1fr] xl:grid-cols-[400px_1fr] gap-6 lg:gap-8">
       <aside className="w-full lg:h-full">
-        <EmployeeProfileCard employee={profile.employee} />
+        <EmployeeProfileCard 
+          employee={profile.employee} 
+          onUpdate={handleUpdateProfile} 
+        />
       </aside>
       <main className="flex flex-col gap-6 lg:gap-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-          <LeaveBalances leaveBalances={profile.leaveBalances} />
-          <LeaveRequestStatusCounts
-            total={profile.requestStatusCounts.total}
-            pending={profile.requestStatusCounts.pending}
-            approved={profile.requestStatusCounts.approved}
-            rejected={profile.requestStatusCounts.rejected}
-          />
-        </div>
-        <LeaveHistoryTimeline leaveHistory={profile.leaveHistory} />
+        {isSuperAdmin ? (
+          <div className="h-full flex flex-col items-center justify-center p-12 bg-white rounded-xl border border-secondary-200 shadow-sm text-center space-y-4">
+            <div className="p-4 bg-secondary-200 rounded-full text-secondary-400">
+             <Info className="w-12 h-12 text-primary-500" strokeWidth={1.5}/>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-secondary-800">Statistics Not Applicable</h3>
+              <p className="text-secondary-500 max-w-sm mx-auto mt-2">
+                Leave balances and tracking are not enabled for system administrator accounts.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+              <LeaveBalances leaveBalances={profile.leaveBalances} />
+              <LeaveRequestStatusCounts
+                total={profile.requestStatusCounts.total}
+                pending={profile.requestStatusCounts.pending}
+                approved={profile.requestStatusCounts.approved}
+                rejected={profile.requestStatusCounts.rejected}
+              />
+            </div>
+            <LeaveHistoryTimeline leaveHistory={profile.leaveHistory} />
+          </>
+        )}
       </main>
     </div>
   );
