@@ -95,11 +95,11 @@ const BulkInviteHistoryModal = ({ isOpen, onClose }: BulkInviteHistoryModalProps
       title={selectedJobId ? "Bulk Upload Details" : "Bulk Upload History"}
       description={selectedJobId ? "Detailed results for the selected upload" : "History of all bulk employee invitations"}
       size={selectedJobId ? "xl" : "lg"}
+      hideFooter
     >
       <div className="min-h-[400px] max-h-[70dvh] flex flex-col overflow-hidden">
         {selectedJobId ? (
           <div className="flex flex-col flex-1 overflow-hidden space-y-4">
-            {/* Header / Back */}
             <div className="flex items-center gap-3">
               <IconButton 
                 icon={ArrowLeft} 
@@ -124,7 +124,6 @@ const BulkInviteHistoryModal = ({ isOpen, onClose }: BulkInviteHistoryModalProps
               </div>
             </div>
 
-            {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input 
@@ -136,7 +135,6 @@ const BulkInviteHistoryModal = ({ isOpen, onClose }: BulkInviteHistoryModalProps
               />
             </div>
 
-            {/* Results Table */}
             <div className="flex-1 overflow-y-auto border rounded-xl bg-slate-50/50">
               {isDetailsLoading ? (
                 <div className="h-full flex items-center justify-center p-12">

@@ -16,9 +16,9 @@ const AuthNavbar = ({ tenantName, avatarFallback }: AuthNavbarProps) => {
       </div>
       <div className="flex items-center gap-3">
         <NotificationBell />
-        <Avatar defaultValue={avatarFallback} className="border text-black">
+        {/* <Avatar defaultValue={avatarFallback} className="border text-black">
           <AvatarFallback>{avatarFallback}</AvatarFallback>
-        </Avatar>
+        </Avatar> */}
       </div>
     </div>
   );
