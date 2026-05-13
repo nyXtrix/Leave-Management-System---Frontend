@@ -38,7 +38,14 @@ export const FormDatePicker = ({
           <div className="space-y-1">
             <DatePicker
               date={field.value ? new Date(field.value) : undefined}
-              onChange={(date) => field.onChange(date?.toISOString())}
+              onChange={(date) => {
+                if (date) {
+                  const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+                  field.onChange(utcDate.toISOString());
+                } else {
+                  field.onChange(undefined);
+                }
+              }}
               placeholder={placeholder}
               className={cn(className, error && "border-rose-400 focus:ring-rose-500/10")}
             />

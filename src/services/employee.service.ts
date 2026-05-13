@@ -5,7 +5,9 @@ import type {
   RecentInviteResponse, 
   EmployeeDetailResponse,
   BulkUploadStatus,
-  EmployeeProfileResponse
+  EmployeeProfileResponse,
+  BulkUserInviteDto,
+  BulkUserInviteDetailsDto
 } from "@/types/employee.types";
 import type { PaginatedResult, QueryParams } from "@/types/utils";
 
@@ -73,4 +75,8 @@ export const employeeService = {
     showSuccessToast: true,
     successMessage: "Profile updated successfully"
   }),
+  
+  getBulkInviteHistory: () => BaseRequestProvider.get<BulkUserInviteDto[]>("/organization/employees/bulk-invite/history"),
+  
+  getBulkInviteDetails: (externalId: string) => BaseRequestProvider.get<BulkUserInviteDetailsDto>(`/organization/employees/bulk-invite/details/${externalId}`),
 };

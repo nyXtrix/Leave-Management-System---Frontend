@@ -18,6 +18,7 @@ interface SectionCardProps {
   tooltipAlign?: "start" | "end";
   tooltipSide?: "top" | "bottom" | "left" | "right";
   tooltipOffset?: number;
+  action?: React.ReactNode;
 }
 
 const SectionCard: React.FC<SectionCardProps> = ({
@@ -30,6 +31,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
   tooltipAlign,
   tooltipSide,
   tooltipOffset,
+  action,
 }) => {
   return (
     <div
@@ -46,25 +48,29 @@ const SectionCard: React.FC<SectionCardProps> = ({
           )}
         </div>
 
-        {info && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="h-7 w-7 flex items-center justify-center rounded-full hover:bg-secondary-100">
-                  <Info className="text-secondary-400 w-5 h-5" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent
-                side={tooltipSide || "top"}
-                align={tooltipAlign}
-                sideOffset={tooltipOffset}
-                className="max-w-md text-center font-medium"
-              >
-                {info}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
+        <div className="flex items-center gap-3">
+          {action && <div>{action}</div>}
+          
+          {info && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="h-7 w-7 flex items-center justify-center rounded-full hover:bg-secondary-100 cursor-help">
+                    <Info className="text-secondary-400 w-5 h-5" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent
+                  side={tooltipSide || "top"}
+                  align={tooltipAlign}
+                  sideOffset={tooltipOffset}
+                  className="max-w-md text-center font-medium"
+                >
+                  {info}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
       </div>
 
       <div className={cn("px-5 py-5", contentClassName)}>{children}</div>

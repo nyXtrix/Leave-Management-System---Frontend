@@ -22,6 +22,8 @@ import { useQuery } from "@/hooks/useQuery";
 import { employeeService } from "@/services/employee.service";
 import { Progress } from "@/components/ui/Progress";
 import { toast } from "sonner";
+import BulkInviteHistoryModal from "./BulkInviteHistoryModal";
+import { History } from "lucide-react";
 
 const UserOnboardManagement = () => {
   const { subdomain } = useParams<{ subdomain: string }>();
@@ -31,6 +33,7 @@ const UserOnboardManagement = () => {
   const [activeJobId, setActiveJobId] = React.useState<string | null>(null);
   const [activeJob, setActiveJob] = React.useState<any>(null);
   const [isProcessing, setIsProcessing] = React.useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = React.useState(false);
 
   const { data: recentInvites, isLoading, refetch: refetchRecentInvites } = useQuery(
     employeeService.getRecentInvites,
@@ -77,7 +80,7 @@ const UserOnboardManagement = () => {
       };
 
       poll();
-      interval = setInterval(poll, 50000);
+      interval = setInterval(poll, 5000);
     }
 
     return () => {
@@ -121,6 +124,15 @@ const UserOnboardManagement = () => {
               title="Bulk User Onboarding"
               info="Upload user data to create multiple users"
               tooltipAlign="end"
+              action={
+                <IconButton
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 gap-1.5 px-2 text-slate-500 hover:text-primary hover:bg-primary/5"
+                  onClick={() => setIsHistoryModalOpen(true)}
+                  icon={History}
+                />
+              }
             >
               <div className="space-y-4">
                 {isProcessing && activeJob ? (
@@ -150,18 +162,18 @@ const UserOnboardManagement = () => {
                   <FileUploader
                     title={
                       <div className="flex justify-center items-center gap-2">
-                        Upload File
-                        <IconButton
-                          variant="link"
-                          size="sm"
-                          className="h-auto p-0 font-bold"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setIsInstructionsOpen(true);
-                          }}
-                        >
-                          (Instructions)
+                          Upload File
+                          <IconButton
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0 font-bold"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setIsInstructionsOpen(true);
+                            }}
+                          >
+                            (Instructions)
                         </IconButton>
                       </div>
                     }
@@ -204,6 +216,11 @@ const UserOnboardManagement = () => {
       <UploadFileInstructions
         isOpen={isInstructionsOpen}
         onClose={() => setIsInstructionsOpen(false)}
+      />
+
+      <BulkInviteHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
       />
     </div>
   );

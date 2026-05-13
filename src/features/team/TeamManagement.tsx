@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useQuery } from "@/hooks/useQuery";
 import { teamService } from "@/services/team.service";
 import ManagementLayout from "@/components/common/ManagementLayout";
-import { Users, Coffee, CheckCircle2, Calendar, Sun, } from "lucide-react";
+import { Users, Coffee, CheckCircle2, Calendar, Sun } from "lucide-react";
 
 const TeamManagement = () => {
   const navigate = useNavigate();
@@ -17,14 +17,20 @@ const TeamManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const PAGE_SIZE = 12;
 
-  const { data: response, isLoading, refetch } = useQuery(
+  const {
+    data: response,
+    isLoading,
+    refetch,
+  } = useQuery(
     teamService.getMyTeam,
-    [{ 
-      page, 
-      pageSize: PAGE_SIZE,
-      searchTerm
-    }],
-    { showGlobalLoader: false, ttl: 0 }
+    [
+      {
+        page,
+        pageSize: PAGE_SIZE,
+        searchTerm,
+      },
+    ],
+    { showGlobalLoader: false, ttl: 0 },
   );
 
   const summary = response?.summary;
@@ -88,7 +94,11 @@ const TeamManagement = () => {
         <EmptyState
           icon={searchTerm ? Search : UserRound}
           title={searchTerm ? "No Members Found" : "No Reportees Yet"}
-          description={searchTerm ? "Try adjusting your search term." : "Once employees are assigned to report to you, they'll appear here."}
+          description={
+            searchTerm
+              ? "Try adjusting your search term."
+              : "Once employees are assigned to report to you, they'll appear here."
+          }
           className="py-20"
         />
       }

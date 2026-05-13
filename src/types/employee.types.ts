@@ -81,3 +81,47 @@ export interface EmployeeProfileResponse {
   };
   leaveHistory: ChartData[];
 }
+
+export const BulkInvitedUserStatus = {
+  Queued: 1,
+  Processing: 2,
+  Completed: 3,
+  Failed: 4,
+  PartiallyFailed: 5,
+} as const;
+export type BulkInvitedUserStatus = (typeof BulkInvitedUserStatus)[keyof typeof BulkInvitedUserStatus];
+
+export const BulkRowStatus = {
+  Failed: 1,
+  Success: 2,
+  Exists: 3,
+} as const;
+export type BulkRowStatus = (typeof BulkRowStatus)[keyof typeof BulkRowStatus];
+
+export interface BulkUserInviteDto {
+  externalId: string;
+  fileName: string;
+  totalRows: number;
+  successCount: number;
+  failureCount: number;
+  status: BulkInvitedUserStatus;
+  errorMessage?: string;
+  createdAt: string;
+}
+
+export interface BulkRowResultDto {
+  email: string;
+  status: BulkRowStatus;
+  errorMessage?: string;
+}
+
+export interface BulkUserInviteDetailsDto {
+  externalId: string;
+  fileName: string;
+  status: BulkInvitedUserStatus;
+  errorMessage?: string;
+  totalRows: number;
+  successCount: number;
+  failureCount: number;
+  results: BulkRowResultDto[];
+}

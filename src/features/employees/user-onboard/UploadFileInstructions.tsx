@@ -13,7 +13,6 @@ const UploadFileInstructions: React.FC<UploadFileInstructionsProps> = ({
   isOpen,
   onClose,
 }) => {
-  // Fetch dynamic lookups from Redux store
   const { roles, departments } = useSelector((state: RootState) => state.lookups);
 
 
