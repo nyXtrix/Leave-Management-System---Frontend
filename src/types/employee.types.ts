@@ -24,7 +24,7 @@ export interface EmployeeListResponse {
   email: string;
   departmentName: string;
   roleName: string;
-  status: number | string;
+  status: number;
   createdAt: string;
 }
 export type RecentInviteResponse = EmployeeListResponse;
@@ -93,8 +93,7 @@ export type BulkInvitedUserStatus = (typeof BulkInvitedUserStatus)[keyof typeof 
 
 export const BulkRowStatus = {
   Failed: 1,
-  Success: 2,
-  Exists: 3,
+  Skipped: 2,
 } as const;
 export type BulkRowStatus = (typeof BulkRowStatus)[keyof typeof BulkRowStatus];
 

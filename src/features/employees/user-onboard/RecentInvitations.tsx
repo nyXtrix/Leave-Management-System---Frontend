@@ -5,6 +5,7 @@ import {
   Mail,
   UserRound,
   ExternalLink,
+  X,
 } from "lucide-react";
 import SectionCard from "@/components/common/SectionCard";
 import IconButton from "@/components/ui/IconButton";
@@ -34,18 +35,23 @@ import { UserPlus } from "lucide-react";
 // ];
 
 interface RecentInvitationsProps {
-  recentInvites:UserProfile[];
+  recentInvites: UserProfile[];
   isOpen: boolean;
   onClose: () => void;
   onOpen: () => void;
 }
 
-const RecentInvitations = ({ recentInvites, isOpen, onClose,onOpen }: RecentInvitationsProps) => {
+const RecentInvitations = ({
+  recentInvites,
+  isOpen,
+  onClose,
+  onOpen,
+}: RecentInvitationsProps) => {
   const navigate = useNavigate();
 
-  const handleNavigateToProfile = (id:string) =>{
+  const handleNavigateToProfile = (id: string) => {
     navigate(`../employee/profile/${id}`);
-  }
+  };
   return (
     <>
       <SectionCard
@@ -102,21 +108,32 @@ const RecentInvitations = ({ recentInvites, isOpen, onClose,onOpen }: RecentInvi
 
                 <div className="flex items-center justify-between pt-2.5 border-t border-slate-100">
                   <div className="flex items-center gap-1.5">
-                    {invite.status === UserStatus.Pending ? (
+                    {invite.status === UserStatus.Pending && (
                       <>
                         <Clock className="h-3.5 w-3.5 text-amber-500" />
                         <span className="text-[11px] font-bold text-amber-600">
                           Pending
                         </span>
                       </>
-                    ) : (
+                    )}
+                    {invite.status === UserStatus.Activated && (
                       <>
                         <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
                         <span className="text-[11px] font-bold text-emerald-600">
-                          {invite.status === UserStatus.Activated ? "Active" : "Inactive"}
+                          {invite.status === UserStatus.Activated
+                            ? "Active"
+                            : "Inactive"}
                         </span>
                       </>
                     )}
+                    {
+                      invite.status === UserStatus.InActive && (
+                        <div className="h-4 flex items-center gap-1 bg-secondary-200 p-2 rounded-md">
+                        <X className="h-3 w-3 text-primary-500"/>
+                        <span className="text-secondary-700 text-[11px]">In Active</span>
+                        </div>
+                      )
+                    }
                   </div>
                   <span className="text-[10px] font-medium text-slate-400">
                     {invite.updatedDate}

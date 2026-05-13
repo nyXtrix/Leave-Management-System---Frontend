@@ -1,22 +1,24 @@
-import type { ApiPermissions, AppPermissions } from './permission.types';
+import type { ApiPermissions, AppPermissions } from "./permission.types";
 
 export const UserStatus = {
   Pending: 1,
   Activated: 2,
   InActive: 3,
-  Terminated: 4
-} as const;
+  Terminated: 4,
+};
 
-export type UserStatus = typeof UserStatus[keyof typeof UserStatus];
+
+export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus];
 
 export const UserLoginStatus = {
   Active: 1,
   Inactive: 2,
   SetPasswordRequired: 3,
-  NotFound: 4
+  NotFound: 4,
 } as const;
 
-export type UserLoginStatus = typeof UserLoginStatus[keyof typeof UserLoginStatus];
+export type UserLoginStatus =
+  (typeof UserLoginStatus)[keyof typeof UserLoginStatus];
 
 export interface UserProfile {
   id: string;

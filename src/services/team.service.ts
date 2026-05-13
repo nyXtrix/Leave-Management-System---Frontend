@@ -8,7 +8,7 @@ export interface TeamMemberResponse {
   email: string;
   departmentName: string;
   roleName: string;
-  status: string;
+  status: number;
   joinedDate: string;
   onLeaveToday: boolean;
   leaveType?: string;

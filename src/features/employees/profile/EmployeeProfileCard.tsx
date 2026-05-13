@@ -270,7 +270,7 @@ const EmployeeProfileCard = ({ employee, onUpdate }: EmployeeProfileCardProps) =
                   Gender
                 </p>
                 <span className="text-slate-600 font-bold">
-                  {employee.gender === 1 ? "Male" : "Female"}
+                  {employee.gender === 1 ? "Male" : employee.gender === 2 ? "Female" : employee.gender === 3 ? "Other" : "Unknown"}
                 </span>
               </div>
             </div>

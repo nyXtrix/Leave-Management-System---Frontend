@@ -10,35 +10,18 @@ interface EmployeeCardProps {
   onViewClick: (employeeId: string) => void;
 }
 const EmployeeCard = ({ employee, onViewClick }: EmployeeCardProps) => {
-  const getStatusInfo = (status: number | string) => {
-    if (typeof status === "number") {
-      switch (status) {
-        case UserStatus.Activated:
-          return { label: "Active", variant: "success" as const };
-        case UserStatus.Pending:
-          return { label: "Pending", variant: "warning" as const };
-        case UserStatus.InActive:
-          return { label: "Inactive", variant: "danger" as const };
-        case UserStatus.Terminated:
-          return { label: "Terminated", variant: "danger" as const };
-        default:
-          return { label: "Unknown", variant: "default" as const };
-      }
-    }
-
-    const s = String(status).toLowerCase();
-    switch (s) {
-      case "activated":
-      case "active":
+  const getStatusInfo = (status: number) => {
+    switch (status) {
+      case UserStatus.Activated:
         return { label: "Active", variant: "success" as const };
-      case "pending":
+      case UserStatus.Pending:
         return { label: "Pending", variant: "warning" as const };
-      case "inactive":
+      case UserStatus.InActive:
         return { label: "Inactive", variant: "danger" as const };
-      case "terminated":
+      case UserStatus.Terminated:
         return { label: "Terminated", variant: "danger" as const };
       default:
-        return { label: status || "Unknown", variant: "default" as const };
+        return { label: "Unknown", variant: "default" as const };
     }
   };
 

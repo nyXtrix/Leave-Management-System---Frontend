@@ -46,12 +46,10 @@ const StatusBadge = ({ status }: { status: BulkInvitedUserStatus }) => {
 
 const RowStatusBadge = ({ status }: { status: BulkRowStatus }) => {
   switch (status) {
-    case BulkRowStatus.Success:
-      return <div className="h-2 w-2 rounded-full bg-emerald-500" />;
+    case BulkRowStatus.Skipped:
+      return <div className="h-2 w-2 rounded-full bg-amber-500" />;
     case BulkRowStatus.Failed:
       return <div className="h-2 w-2 rounded-full bg-rose-500" />;
-    case BulkRowStatus.Exists:
-      return <div className="h-2 w-2 rounded-full bg-amber-500" />;
     default:
       return null;
   }
@@ -157,15 +155,14 @@ const BulkInviteHistoryModal = ({ isOpen, onClose }: BulkInviteHistoryModalProps
                            <div className="flex items-center gap-2">
                               <RowStatusBadge status={row.status} />
                               <span className="text-xs font-bold text-slate-600">
-                                {row.status === BulkRowStatus.Success ? "Success" : 
-                                 row.status === BulkRowStatus.Exists ? "Exists" : "Failed"}
+                                {row.status === BulkRowStatus.Skipped ? "Exists" : "Failed"}
                               </span>
                            </div>
                         </td>
                         <td className="px-4 py-3">
                            <span className={cn(
                              "text-[11px] font-medium",
-                             row.status === BulkRowStatus.Success ? "text-emerald-600" : "text-rose-500"
+                             row.status === BulkRowStatus.Skipped ? "text-amber-600" : "text-rose-500"
                            )}>
                              {row.errorMessage || "Processed successfully"}
                            </span>

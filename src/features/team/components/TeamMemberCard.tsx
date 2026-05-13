@@ -15,10 +15,10 @@ import {
   Sun,
   Calendar,
 } from "lucide-react";
+import { UserStatus } from "@/types/auth.types";
 import { cn } from "@/lib/utils";
 import { isWeekend } from "date-fns";
 
-// TeamMember interface matching backend DTO
 export interface TeamMember {
   id: string;
   firstName: string;
@@ -26,7 +26,7 @@ export interface TeamMember {
   email: string;
   departmentName: string;
   roleName: string;
-  status: string;
+  status: number;
   joinedDate: string;
   onLeaveToday: boolean;
   leaveType?: string;
@@ -58,12 +58,18 @@ const TeamMemberCard = ({
     ? (LEAVE_ICONS[member.leaveType] ?? LEAVE_ICONS["default"])
     : LEAVE_ICONS["default"];
 
-  const statusVariant =
-    member.status === "Active"
-      ? ("success" as const)
-      : member.status === "Pending"
-      ? ("warning" as const)
-      : ("danger" as const);
+  const statusInfo = (() => {
+    switch (member.status) {
+      case UserStatus.Activated:
+        return { label: "Active", variant: "success" as const };
+      case UserStatus.Pending:
+        return { label: "Pending", variant: "warning" as const };
+      case UserStatus.InActive:
+        return { label: "Inactive", variant: "danger" as const };
+      default:
+        return { label: "Unknown", variant: "default" as const };
+    }
+  })();
 
   return (
     <div className="w-full rounded-lg p-4 bg-gray-100/60 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200">
@@ -110,15 +116,13 @@ const TeamMemberCard = ({
           </div>
         </div>
 
-        <Badge variant={statusVariant} className="mt-2 shrink-0">
-          {member.status}
+        <Badge variant={statusInfo.variant} className="mt-2 shrink-0">
+          {statusInfo.label}
         </Badge>
       </div>
 
-      {/* Divider */}
       <div className="my-3 border-t border-gray-300" />
 
-      {/* Today's availability */}
       <div
         className={cn(
           "flex items-center gap-2 px-3 py-2 rounded-lg mb-3 border transition-colors duration-300",
@@ -152,7 +156,7 @@ const TeamMemberCard = ({
               </span>
               {member.leaveReturnDate && (
                 <span className="text-[10px] text-amber-500 ml-1">
-                  · Back {member.leaveReturnDate}
+                  · Back {new Date(member.leaveReturnDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                 </span>
               )}
             </div>
@@ -167,7 +171,6 @@ const TeamMemberCard = ({
         )}
       </div>
 
-      {/* Meta grid */}
       <div className="grid grid-cols-2 gap-y-2 text-sm">
         <p className="text-gray-500 font-medium flex items-center gap-1.5">
           <Building2 className="h-3.5 w-3.5 text-gray-400" />
