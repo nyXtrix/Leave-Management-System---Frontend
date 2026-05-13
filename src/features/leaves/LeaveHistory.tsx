@@ -1,7 +1,7 @@
 import { DataTable } from "@/components/tables/DataTable";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import React, { useMemo } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import IconButton from "@/components/ui/IconButton";
 import { columns } from "./columns";
 import type { LeaveRecord } from "@/types/leave.types";
@@ -19,6 +19,7 @@ interface LeaveHistoryProps {
   pageSize: number;
   onApplyLeave: () => void;
   onRefresh?: () => void;
+  onCancelLeave: (id: string) => void;
 }
 
 const LeaveHistory = ({
@@ -31,6 +32,7 @@ const LeaveHistory = ({
   pageSize,
   onApplyLeave,
   onRefresh,
+  onCancelLeave,
 }: LeaveHistoryProps) => {
   const mappedData: LeaveRecord[] = useMemo(() => {
     if (!data?.items) return [];
@@ -90,6 +92,23 @@ const LeaveHistory = ({
           onRefresh={onRefresh}
           title="Request Timeline"
           subtitle="A comprehensive log of your time-off history and status transitions."
+          actions={(row) => (
+            <div className="flex items-center gap-2">
+              {row.status === "Pending" && (
+                <IconButton
+                  icon={Trash2}
+                  variant="ghost"
+                  size="xs"
+                  className="h-8 w-8 p-0 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                  tooltip="Cancel Request"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCancelLeave(row.id);
+                  }}
+                />
+              )}
+            </div>
+          )}
         />
       </div>
     </div>

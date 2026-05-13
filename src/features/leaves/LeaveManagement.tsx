@@ -7,6 +7,8 @@ import { useLoader } from "@/contexts/LoaderContext";
 import ApplyLeaveModal from "./ApplyLeaveModal";
 import type { LeaveStatus, LeaveBalance, LeaveRequest } from "@/types/leave.types";
 import type { PaginatedResult } from "@/types/utils";
+import { toast } from "sonner";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 const LeaveManagement = () => {
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
@@ -55,6 +57,25 @@ const LeaveManagement = () => {
     refetchBalances();
     refetchHistory();
   };
+  
+  const handleCancelLeave = async (id: string) => {
+    try {
+      showLoader();
+      await leaveService.cancelLeave(id);
+      toast.success("Leave request cancelled successfully", {
+        icon: <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+      });
+      refetchBalances();
+      refetchHistory();
+    } catch (error) {
+      toast.error("Failed to cancel leave request", {
+        icon: <AlertCircle className="h-4 w-4 text-rose-500" />
+      });
+      console.error("Failed to cancel leave:", error);
+    } finally {
+      hideLoader();
+    }
+  };
 
   const handleTabChange = (val: string) => {
     setActiveTab(val);
@@ -94,6 +115,7 @@ const LeaveManagement = () => {
           pageSize={pageSize}
           onApplyLeave={() => setIsApplyModalOpen(true)}
           onRefresh={refetchHistory}
+          onCancelLeave={handleCancelLeave}
         />
       </div>
 

@@ -74,7 +74,7 @@ export const leaveService = {
       reason,
     }),
 
-  cancelLeave: (id: string) => BaseRequestProvider.delete(`/leaves/${id}`),
+  cancelLeave: (id: string) => BaseRequestProvider.post(`/leaves/${id}/cancel`),
 
   getMyBalance: () => BaseRequestProvider.get<LeaveBalance[]>("/leaves/balances"),
 

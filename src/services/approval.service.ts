@@ -10,7 +10,7 @@ export interface ApprovalListResponse {
   totalDays: number;
   reason: string;
   appliedAt: string;
-  status: number;
+  status: string;
 }
 
 export interface PaginatedResult<T> {

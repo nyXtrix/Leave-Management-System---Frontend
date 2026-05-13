@@ -69,7 +69,7 @@ const ApprovalCard = ({ approval, onApprove, onReject, onForward }: ApprovalCard
               <Clock3 className="h-3.5 w-3.5 shrink-0 text-primary-600" />
               <span className="text-xs font-medium whitespace-nowrap">{pendingSince}</span>
             </div>
-            <IconButton
+            {/* <IconButton
               icon={ArrowRightLeft}
               onClick={() => onForward(approval.approvalExternalId)}
               tooltip="Forward"
@@ -77,27 +77,31 @@ const ApprovalCard = ({ approval, onApprove, onReject, onForward }: ApprovalCard
               size="xs"
               className="h-7 w-7 p-0 text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-100 transition-all shadow-none"
               iconClassName="h-3.5 w-3.5"
-            />
-            <IconButton
-              icon={X}
-              onClick={() => onReject(approval.approvalExternalId)}
-              variant="ghost"
-              size="xs"
-              className="h-7 px-2.5 rounded-md flex items-center gap-1 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-100 transition-all shadow-none"
-              iconClassName="h-3 w-3"
-            >
-              Reject
-            </IconButton>
-            <IconButton
-              onClick={() => onApprove(approval.approvalExternalId)}
-              variant="ghost"
-              size="xs"    
-              icon={Check}
-              className="h-7 px-2.5 rounded-md flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all shadow-none"
-              iconClassName="h-3 w-3"
-            >
-              Approve
-            </IconButton>
+            /> */}
+            {approval.status === "Pending" && (
+              <>
+                <IconButton
+                  icon={X}
+                  onClick={() => onReject(approval.approvalExternalId)}
+                  variant="ghost"
+                  size="xs"
+                  className="h-7 px-2.5 rounded-md flex items-center gap-1 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-100 transition-all shadow-none"
+                  iconClassName="h-3 w-3"
+                >
+                  Reject
+                </IconButton>
+                <IconButton
+                  onClick={() => onApprove(approval.approvalExternalId)}
+                  variant="ghost"
+                  size="xs"    
+                  icon={Check}
+                  className="h-7 px-2.5 rounded-md flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all shadow-none"
+                  iconClassName="h-3 w-3"
+                >
+                  Approve
+                </IconButton>
+              </>
+            )}
           </div>
         </div>
 
@@ -115,26 +119,30 @@ const ApprovalCard = ({ approval, onApprove, onReject, onForward }: ApprovalCard
             className="h-7 w-7 p-0 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all shadow-none"
             iconClassName="h-3.5 w-3.5"
           /> */}
-          <IconButton
-            icon={X}
-            onClick={() => onReject(approval.approvalExternalId)}
-            variant="ghost"
-            size="xs"
-            className="h-7 px-2.5 rounded-md flex items-center gap-1 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-100 transition-all shadow-none"
-            iconClassName="h-3 w-3"
-          >
-            Reject
-          </IconButton>
-          <IconButton
-            icon={Check}
-            onClick={() => onApprove(approval.approvalExternalId)}
-            variant="ghost"
-            size="xs"
-            className="h-7 px-2.5 rounded-md flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all shadow-none"
-            iconClassName="h-3 w-3"
-          >
-            Approve
-          </IconButton>
+          {approval.status === "Pending" && (
+            <>
+              <IconButton
+                icon={X}
+                onClick={() => onReject(approval.approvalExternalId)}
+                variant="ghost"
+                size="xs"
+                className="h-7 px-2.5 rounded-md flex items-center gap-1 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-100 transition-all shadow-none"
+                iconClassName="h-3 w-3"
+              >
+                Reject
+              </IconButton>
+              <IconButton
+                icon={Check}
+                onClick={() => onApprove(approval.approvalExternalId)}
+                variant="ghost"
+                size="xs"
+                className="h-7 px-2.5 rounded-md flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all shadow-none"
+                iconClassName="h-3 w-3"
+              >
+                Approve
+              </IconButton>
+            </>
+          )}
         </div>
       </div>
     </div>
