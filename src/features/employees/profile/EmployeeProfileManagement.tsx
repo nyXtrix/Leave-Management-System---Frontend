@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useQuery } from "@/hooks/useQuery";
+import { useQuery, invalidateQuery } from "@/hooks/useQuery";
 import { employeeService } from "@/services/employee.service";
 import EmployeeProfileCard from "./EmployeeProfileCard";
 import LeaveBalances from "./leave-stats/leave-balance/LeaveBalances";
@@ -76,6 +76,7 @@ const EmployeeProfileManagement = () => {
       ...values,
       gender: Number(values.gender),
     });
+    invalidateQuery("getProfile");
     refetch();
   };
 

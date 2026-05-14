@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import LeaveCard from "./LeaveCard";
 import LeaveHistory from "./LeaveHistory";
-import { useQuery } from "@/hooks/useQuery";
+import { useQuery, invalidateQuery } from "@/hooks/useQuery";
 import { leaveService, type LeaveFilters } from "@/services/leave.service";
 import { useLoader } from "@/contexts/LoaderContext";
 import ApplyLeaveModal from "./ApplyLeaveModal";
@@ -54,6 +54,8 @@ const LeaveManagement = () => {
       notes: data.reason,
     });
     setIsApplyModalOpen(false);
+    invalidateQuery("getMyBalance");
+    invalidateQuery("getMyLeaves");
     refetchBalances();
     refetchHistory();
   };
@@ -65,6 +67,8 @@ const LeaveManagement = () => {
       toast.success("Leave request cancelled successfully", {
         icon: <CheckCircle2 className="h-4 w-4 text-emerald-500" />
       });
+      invalidateQuery("getMyBalance");
+      invalidateQuery("getMyLeaves");
       refetchBalances();
       refetchHistory();
     } catch (error) {

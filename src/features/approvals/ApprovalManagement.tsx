@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Clock, Inbox, CheckCircle, TrendingUp } from "lucide-react";
-import { useQuery } from "@/hooks/useQuery";
+import { useQuery, invalidateQuery } from "@/hooks/useQuery";
 import { approvalService } from "@/services/approval.service";
 import ApprovalQueue from "./components/ApprovalQueue";
 import ProcessApprovalModal from "./components/ProcessApprovalModal";
@@ -58,13 +58,13 @@ const ApprovalManagement = () => {
       searchTerm: debouncedSearch, 
       status: status || undefined 
     }],
-    { showGlobalLoader: false, ttl: 0 }
+    { showGlobalLoader: false }
   );
 
   const { data: statsData, refetch: refetchStats, isLoading: isStatsLoading } = useQuery(
     approvalService.getStats,
     [],
-    { showGlobalLoader: false, ttl: 0 }
+    { showGlobalLoader: false }
   );
 
   const approvals = data?.items || [];
@@ -77,6 +77,8 @@ const ApprovalManagement = () => {
       isApproved: activeModal.type === "approve",
       remarks,
     });
+    invalidateQuery("getApprovals");
+    invalidateQuery("getStats");
     await refetch();
     await refetchStats();
     setActiveModal(null);
@@ -89,6 +91,8 @@ const ApprovalManagement = () => {
       newApproverExternalId: newApproverId,
       remarks,
     });
+    invalidateQuery("getApprovals");
+    invalidateQuery("getStats");
     await refetch();
     await refetchStats();
     setActiveModal(null);

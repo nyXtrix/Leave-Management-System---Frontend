@@ -9,7 +9,7 @@ import ViewPermissionModel from "./components/ViewPermissionModel";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { getRoleColumns } from "./columns";
-import { useQuery } from "@/hooks/useQuery";
+import { useQuery, invalidateQuery } from "@/hooks/useQuery";
 import { useState, useEffect } from "react";
 import { useLoader } from "@/contexts/LoaderContext";
 import type { QueryParams } from "@/types/utils";
@@ -76,11 +76,13 @@ const RolesManagement = () => {
         confirmText: "Deactivate",
         onConfirm: async () => {
           await roleService.toggleStatus(id, false);
+          invalidateQuery("getRoles");
           rolesRefetch();
         },
       });
     } else {
       await roleService.toggleStatus(id, true);
+      invalidateQuery("getRoles");
       rolesRefetch();
     }
   };
@@ -102,6 +104,7 @@ const RolesManagement = () => {
       confirmText: "Delete Role",
       onConfirm: async () => {
         await roleService.deleteRole(id);
+        invalidateQuery("getRoles");
         rolesRefetch();
       },
     });
@@ -134,6 +137,7 @@ const RolesManagement = () => {
     } else {
       await roleService.createRole(payload as CreateRoleRequest);
     }
+    invalidateQuery("getRoles");
     rolesRefetch();
     handleCloseCreate();
   };

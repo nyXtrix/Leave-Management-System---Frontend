@@ -8,7 +8,7 @@ import {
 import LeaveTypeCard from "./LeaveTypeCard";
 import CreateOrEditLeaveTypeModal from "./components/CreateOrEditLeaveTypeModal";
 import ConfirmationModal from "@/components/common/ConfirmationModal";
-import { useQuery } from "@/hooks/useQuery";
+import { useQuery, invalidateQuery } from "@/hooks/useQuery";
 import EmptyState from "@/components/common/EmptyState";
 import IconButton from "@/components/ui/IconButton";
 import ManagementLayout from "@/components/common/ManagementLayout";
@@ -61,6 +61,7 @@ const LeaveTypesManagement = () => {
     } else {
       await leavePolicyService.createLeaveType(data);
     }
+    invalidateQuery("getLeaveTypes");
     await refetch();
     dispatch(invalidateLookup("leaveTypes"));
     handleCloseModal();
@@ -69,6 +70,7 @@ const LeaveTypesManagement = () => {
   const handleConfirmDelete = async () => {
     if (!typeToDelete) return;
     await leavePolicyService.deleteLeaveType(typeToDelete.externalId);
+    invalidateQuery("getLeaveTypes");
     await refetch();
     dispatch(invalidateLookup("leaveTypes"));
     setTypeToDelete(null);

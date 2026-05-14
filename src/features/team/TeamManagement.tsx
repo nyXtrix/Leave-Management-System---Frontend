@@ -30,7 +30,7 @@ const TeamManagement = () => {
         searchTerm,
       },
     ],
-    { showGlobalLoader: false, ttl: 0 },
+    { showGlobalLoader: false },
   );
 
   const summary = response?.summary;

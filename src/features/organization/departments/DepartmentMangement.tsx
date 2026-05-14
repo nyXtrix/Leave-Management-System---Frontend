@@ -7,7 +7,7 @@ import Pagination from "@/components/tables/Pagination";
 import { departmentService } from "@/services/department.service";
 import InputWithIcon from "@/components/common/inputs/InputWithIcon";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useQuery } from "@/hooks/useQuery";
+import { useQuery, invalidateQuery } from "@/hooks/useQuery";
 import type { DepartmentResponse } from "@/types/organization.types";
 import ManagementLayout from "@/components/common/ManagementLayout";
 
@@ -34,6 +34,7 @@ const DepartmentMangement = () => {
   const handleCreateDepartment = async (payload: { name: string; description: string }) => {
     try {
       await departmentService.createDepartment(payload);
+      invalidateQuery("getDepartments");
       refetch();
       setCreateModal(false);
     } catch (error) {
@@ -44,6 +45,7 @@ const DepartmentMangement = () => {
   const handleUpdateDepartment = async (id: string, payload: { name: string; description: string }) => {
     try {
       await departmentService.updateDepartment(id, payload);
+      invalidateQuery("getDepartments");
       refetch();
     } catch (error) {
       console.error("Failed to update department:", error);
@@ -53,6 +55,7 @@ const DepartmentMangement = () => {
   const handleDeleteDepartment = async (id: string) => {
     try {
       await departmentService.deleteDepartment(id);
+      invalidateQuery("getDepartments");
       refetch();
     } catch (error) {
       console.error("Failed to delete department:", error);
