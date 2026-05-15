@@ -40,7 +40,7 @@ const TeamManagement = () => {
   const handleViewProfile = (employeeId: string) => {
     const currentSubdomain = subdomain || user?.subdomain;
     if (!currentSubdomain) return;
-    navigate(`/${currentSubdomain}/profile/${employeeId}`);
+    navigate(`/${currentSubdomain}/employee/profile/${employeeId}`);
   };
 
   const handleSearchChange = (value: string) => {

@@ -78,7 +78,7 @@ const ApprovalCard = ({ approval, onApprove, onReject, onForward }: ApprovalCard
               className="h-7 w-7 p-0 text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-100 transition-all shadow-none"
               iconClassName="h-3.5 w-3.5"
             /> */}
-            {approval.status === "Pending" && (
+            {approval.status === 1 && (
               <>
                 <IconButton
                   icon={X}
@@ -119,7 +119,7 @@ const ApprovalCard = ({ approval, onApprove, onReject, onForward }: ApprovalCard
             className="h-7 w-7 p-0 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all shadow-none"
             iconClassName="h-3.5 w-3.5"
           /> */}
-          {approval.status === "Pending" && (
+          {approval.status === 1 && (
             <>
               <IconButton
                 icon={X}
